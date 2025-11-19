@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Bank Early Warning System — Dashboard</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        
+        <style>
+                /* Global & Custom Layout Styling */
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+                body { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: #f4f7f9; display: flex; min-height: 100vh; margin: 0; }
+                
+                /* Layout Structure */
+                .sidebar { width: 250px; background-color: #ffffff; box-shadow: 2px 0 5px rgba(0,0,0,0.05); padding: 20px 0; display: flex; flex-direction: column; flex-shrink: 0; }
+                .main-content-wrapper { flex-grow: 1; display: flex; flex-direction: column; }
+                .header { background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+                .content-area { flex-grow: 1; padding: 30px; max-width: 100%; }
+                
+                /* Sidebar Components */
+                .logo { font-size: 20px; font-weight: 800; color: #4f46e5; padding: 0 20px 20px; border-bottom: 1px solid #f3f4f6; margin-bottom: 10px; }
+                .nav-item { padding: 10px 20px; color: #4b5563; text-decoration: none; display: flex; align-items: center; gap: 10px; font-weight: 500; transition: background-color 0.2s, color 0.2s; cursor: pointer; }
+                .nav-item:hover, .nav-item.active { background-color: #eef2ff; color: #4f46e5; border-right: 3px solid #4f46e5; }
+                
+                /* Card Overrides (Existing) */
+                .card { box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 12px; border: 1px solid #e5e7eb; }
+                .stat-card { border-radius: 12px; padding: 16px; background-color: white; border: 1px solid #f3f4f6; }
+                .input-field { transition: border-color 0.2s; }
+                .input-field:focus { border-color: #4f46e5; box-shadow: 0 0 0 1px #4f46e5; }
+                .cont-positive { color: #dc2626; } /* Red (Increased Risk) */
+                .cont-negative { color: #059669; } /* Green (Reduced Risk) */
+        </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">EWS Portal</div>
+        <nav>
+            <div class="nav-item active" id="navDashboard">📊 Dashboard</div>
+            <div class="nav-item" id="navRisk">📈 Risk Management</div>
+            <div class="nav-item" id="navModels">🧠 Model Performance</div>
+            <div class="nav-item" id="navAdmin">⚙️ Admin Portal</div>
+        </nav>
+    </aside>
+
+    <div class="main-content-wrapper">
+        
+        <header class="header">
+            <h1 class="text-2xl font-bold text-gray-800">Early Warning System Dashboard</h1>
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2 text-sm text-gray-600">
+                    <svg class="w-5 h-5 text-indigo-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path></svg>
+                    <span>Welcome, Analyst</span>
+                </div>
+                <button id="logoutBtn" type="button" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition duration-150">Logout</button>
+            </div>
+        </header>
+
+        <main class="content-area">
+            <div class="max-w-full">
+                
+                <section class="mb-8">
+                    <h2 class="text-xl font-semibold mb-3 text-gray-800">System Overview</h2>
+                    <div id="statsSection" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="stat-card">
+                            <div class="text-xs font-medium text-gray-500">Total Predictions</div>
+                            <div id="statTotal" class="text-2xl font-bold text-gray-800 mt-1">—</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-xs font-medium text-gray-500">Default Rate (Overall)</div>
+                            <div id="statRate" class="text-2xl font-bold text-gray-800 mt-1">—</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-xs font-medium text-gray-500">Model Status</div>
+                            <div id="statModel" class="text-2xl font-bold text-green-600 mt-1">Ready</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="text-xs font-medium text-gray-500">Uptime (min)</div>
+                            <div id="statUptime" class="text-2xl font-bold text-gray-800 mt-1">—</div>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    
+                    <section class="lg:col-span-8 bg-white p-6 card">
+                        <h2 class="text-xl font-semibold mb-4 text-gray-800">Loan Applicant Data Input (29 Features)</h2>
+                        <form id="predictionForm" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <label class="block">
+                                <span class="text-sm font-medium text-gray-700">Rate of Interest (%)</span>
+                                <input type="number" name="rate_of_interest" value="4.5" step="0.01" required class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg" />
+                            </label>
+                            <label class="block">
+                                <span class="text-sm font-medium text-gray-700">Interest Rate Spread</span>
+                                <input type="number" name="Interest_rate_spread" value="0.5" step="0.01" required class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg" />
+                            </label>
+                            <label class="block">
+                                <span class="text-sm font-medium text-gray-700">Upfront Charges ($)</span>
+                                <input type="number" name="Upfront_charges" value="1500" step="1" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg" />
+                            </label>
+                            <label class="block">
+                                <span class="text-sm font-medium text-gray-700">Credit Score</span>
+                                <input type="number" name="Credit_Score" value="720" min="300" max="900" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg" />
+                            </label>
+                            <label class="block">
+                                <span class="text-sm font-medium text-gray-700">Income ($/month)</span>
+                                <input type="number" name="income" value="7000" step="1" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg" />
+                            </label>
+                            <label class="block">
+                                <span class="text-sm font-medium text-gray-700">LTV (%)</span>
+                                <input type="number" name="LTV" value="75" step="0.1" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg" />
+                            </label>
+                            <label class="block">
+                                <span class="text-sm font-medium text-gray-700">DTI (dtir1) (%)</span>
+                                <input type="number" name="dtir1" value="38" step="0.1" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg" />
+                            </label>
+                            <label class="block">
+                                <span class="text-sm font-medium text-gray-700">Term (months)</span>
+                                <select name="term" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg"><option value="360" selected>360 (30 Years)</option><option value="180">180 (15 Years)</option></select>
+                            </label>
+                            <label class="block">
+                                <span class="text-sm font-medium text-gray-700">Gender</span>
+                                <select name="Gender" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg"><option value="Male" selected>Male</option><option value="Female">Female</option></select>
+                            </label>
+                            <label class="block">
+                                <span class="text-sm font-medium text-gray-700">Age Bracket</span>
+                                <select name="age" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg"><option value="25-34" selected>25-34</option><option value="35-44">35-44</option><option value="45-54">45-54</option><option value="55-64">55-64</option></select>
+                            </label>
+                            <div class="md:col-span-3 border-t pt-4 mt-4">
+                                <h3 class="text-md font-semibold text-gray-700 mb-3">Loan and Property Details</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Loan Limit</span><select name="loan_limit" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="cf">Conforming</option><option value="ncf">Non-Conforming</option></select></label>
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Approval In Advance</span><select name="approv_in_adv" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="nopre">No Pre-Approval</option><option value="pre">Pre-Approval</option></select></label>
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Loan Type</span><select name="loan_type" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="type1">Type 1</option><option value="type2">Type 2</option><option value="type3">Type 3</option></select></label>
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Loan Purpose</span><select name="loan_purpose" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="p1">Purchase</option><option value="p2">Refinance</option><option value="p3">Cash Out</option></select></label>
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Credit Worthiness</span><select name="Credit_Worthiness" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="l1">Level 1</option><option value="l2">Level 2</option></select></label>
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Open Credit</span><select name="open_credit" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="nopc">No</option><option value="opc">Yes</option></select></label>
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Busi. / Commercial</span><select name="business_or_commercial" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="nob/c">No</option><option value="b/c">Yes</option></select></label>
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Neg. Amortization</span><select name="Neg_ammortization" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="not_neg">No</option><option value="neg_amm">Yes</option></select></label>
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Interest Only</span><select name="interest_only" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="not_int">No</option><option value="int_only">Yes</option></select></label>
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Lump Sum Payment</span><select name="lump_sum_payment" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="not_lpsm">No</option><option value="lpsm">Yes</option></select></label>
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Construction Type</span><select name="construction_type" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="sb">Site Built</option><option value="nb">New Build</option></select></label>
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Occupancy Type</span><select name="occupancy_type" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="pr">Primary</option><option value="sr">Secondary</option></select></label>
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Secured By</span><select name="Secured_by" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="home">Home</option><option value="other">Other</option></select></label>
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Total Units</span><select name="total_units" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="1U">1 Unit</option><option value="2U">2 Units</option></select></label>
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Credit Type</span><select name="credit_type" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="EXP">Experian</option><option value="STD">Standard</option></select></label>
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Co-applicant Credit Type</span><select name="co_applicant_credit_type" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="CIB">CIB</option><option value="OTH">Other</option></select></label>
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Submission Method</span><select name="submission_of_application" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="to_inst">To Institution</option><option value="online">Online</option></select></label>
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Region</span><select name="Region" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="south">South</option><option value="north">North</option></select></label>
+                                    <label class="block"><span class="text-xs font-medium text-gray-500">Security Type</span><select name="Security_Type" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="direct">Direct</option><option value="indirect">Indirect</option></select></label>
+                                </div>
+                            </div>
+                            <div class="md:col-span-3 flex items-center gap-3 mt-6 pt-4 border-t">
+                                <button id="predictBtn" type="submit" class="flex items-center space-x-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition duration-150">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                                    <span>Run Risk Prediction</span>
+                                </button>
+                                <button id="explainBtn" type="button" class="px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition duration-150">Explain (SHAP)</button>
+                                <button id="exportBtn" type="button" class="px-4 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-150">Export PDF Report</button>
+                                <button id="resetBtn" type="button" class="px-4 py-3 border border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 transition duration-150">Reset</button>
+                                <div id="loadingIndicator" class="ml-auto hidden text-sm text-indigo-600 font-medium">
+                                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-indigo-500 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    Processing...
+                                </div>
+                            </div>
+                        </form>
+                    </section>
+
+                    <aside class="lg:col-span-4 space-y-6">
+                        <div class="bg-white p-6 card">
+                            <h3 class="text-xl font-semibold mb-4 text-gray-800">Prediction Summary</h3>
+                            <div id="predSummary" class="flex flex-col space-y-4">
+                                <canvas id="probChart" width="300" height="180"></canvas>
+                                <div class="flex justify-between items-center pt-2 border-t">
+                                    <div>
+                                        <div class="text-sm text-gray-500">Risk Level</div>
+                                        <div id="riskLabel" class="text-3xl font-extrabold" style="color: #6b7280;">—</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-sm text-gray-500">Default Probability</div>
+                                        <div id="probPercent" class="text-3xl font-extrabold text-indigo-600">—</div>
+                                    </div>
+                                </div>
+                                <p id="recommendationText" class="text-sm font-medium text-gray-600 pt-2 border-t border-dashed">—</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 card">
+                            <h3 class="text-lg font-semibold mb-3 text-gray-800">Feature Impact (Log-Odds)</h3>
+                            <div id="contributions" class="grid grid-cols-1 gap-2">
+                                <p class="text-sm text-gray-400">Run a prediction or click 'Explain' to see which features increase (red) or reduce (green) the default risk.</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 card">
+                            <h3 class="text-lg font-semibold mb-3 text-gray-800">Recent Decisions</h3>
+                            <div id="history" class="space-y-2 text-sm text-gray-700">
+                                <p class="text-gray-400">Loading history...</p>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+      // Set the active link based on the current page
+        document.getElementById('navDashboard').classList.add('active');
+
+        // --- Navigation Handlers ---
+        // Changed alert() placeholders to actual page navigation
+        document.getElementById('navDashboard').addEventListener('click', () => { window.location.href = '/static/bank_dashboard.html'; });
+        document.getElementById('navRisk').addEventListener('click', () => { window.location.href = '/static/risk_management.html'; });
+        document.getElementById('navModels').addEventListener('click', () => { window.location.href = '/static/model_performance.html'; });
+        document.getElementById('navAdmin').addEventListener('click', () => { window.location.href = '/static/admin.html'; });
+        
+        // --- Logout Fix ---
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            const res = await fetch(window.location.origin + '/admin-logout', { method: 'POST', credentials: 'same-origin' });
+            if (res.redirected) {
+              window.location.href = res.url;
+            } else {
+              // Fallback to login page if no redirect header is provided
+              window.location.href = '/admin-login.html'; 
+            }
+        });
+
+        // --- Existing Prediction/Stats/History Logic (UNMODIFIED) ---
+        const API_URL = window.location.origin + '/predict';
+        const HISTORY_URL = window.location.origin + '/predictions';
+        const STATS_URL = window.location.origin + '/stats';
+        
+
+        // Chart.js donut for probability
+        const ctx = document.getElementById('probChart').getContext('2d');
+        const probChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Default', 'Non-default'],
+                datasets: [{
+                    data: [0.5, 0.5],
+                    backgroundColor: ['#f87171', '#34d399'], // Tailwind red-400 & green-400
+                    hoverBackgroundColor: ['#ef4444', '#10b981'], // Tailwind red-500 & green-500
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                cutout: '75%',
+                plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 10 } } },
+                animation: { animateScale: true }
+            }
+        });
+
+        const form = document.getElementById('predictionForm');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+
+        async function fetchStats() {
+            try {
+                const r = await fetch(STATS_URL);
+                if (!r.ok) return;
+                const j = await r.json();
+                document.getElementById('statTotal').innerText = j.total_predictions.toLocaleString();
+                document.getElementById('statRate').innerText = j.default_rate.toFixed(2) + '%';
+                document.getElementById('statUptime').innerText = j.uptime_minutes.toLocaleString();
+                const modelStatus = document.getElementById('statModel');
+                modelStatus.innerText = j.model_status;
+                modelStatus.classList.toggle('text-green-600', j.model_status === 'Loaded');
+                modelStatus.classList.toggle('text-red-600', j.model_status !== 'Loaded');
+            } catch (e) { console.warn('stats error', e); }
+        }
+
+        async function fetchHistory() {
+            try {
+                const r = await fetch(HISTORY_URL + '?limit=10');
+                if (!r.ok) return;
+                const j = await r.json();
+                renderHistory(j.predictions || []);
+            } catch (e) { console.warn('history error', e); }
+        }
+
+        function renderHistory(items) {
+            const c = document.getElementById('history');
+            if (!items || items.length === 0) {
+                c.innerHTML = '<p class="text-gray-400">No entries yet.</p>';
+                return;
+            }
+            c.innerHTML = items.map(it => {
+                const prob = (it.default_probability * 100).toFixed(1);
+                const isHighRisk = it.prediction_status === 1;
+                const color = isHighRisk ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
+                return `<div class="flex justify-between items-center border-b border-gray-100 py-3">
+                            <div>
+                                <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${color}">${isHighRisk ? 'HIGH RISK' : 'LOW RISK'}</span>
+                                <div class="text-xs text-gray-500 mt-1">${new Date(it.timestamp).toLocaleString()}</div>
+                            </div>
+                            <div class="text-lg font-bold text-indigo-600">${prob}%</div>
+                        </div>`;
+            }).join('');
+        }
+
+        function renderContributions(contrib) {
+            const el = document.getElementById('contributions');
+            if (!contrib || Object.keys(contrib).length === 0) {
+                el.innerHTML = '<p class="text-sm text-gray-400">No explainability data available. The model may not provide linear coefficients or SHAP failed.</p>';
+                return;
+            }
+            // Convert to array and sort by absolute impact
+            const arr = Object.entries(contrib).map(([k,v]) => ({k: k.replace(/_/g,' ').replace(/-/g,' ').toUpperCase(), v}));
+            arr.sort((a,b) => Math.abs(b.v) - Math.abs(a.v));
+            const top = arr.slice(0, 8);
+            el.innerHTML = top.map(item => {
+                const isPositive = item.v >= 0;
+                const colorClass = isPositive ? 'cont-positive' : 'cont-negative';
+                const sign = isPositive ? '↑' : '↓';
+                return `<div class="flex justify-between items-center border-b border-gray-100 py-1.5">
+                            <div class="text-xs font-medium text-gray-600">${item.k}</div>
+                            <div class="text-sm font-semibold ${colorClass}">${sign} ${Math.abs(item.v).toFixed(4)}</div>
+                        </div>`;
+            }).join('');
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            loadingIndicator.classList.remove('hidden');
+            const fd = new FormData(form);
+            const payload = {};
+            // Gather all form data and convert known numerics
+            const numericKeys = ['rate_of_interest','Interest_rate_spread','Upfront_charges','term','income','Credit_Score','LTV','dtir1'];
+            fd.forEach((v,k) => {
+                if (numericKeys.includes(k)) {
+                    payload[k] = parseFloat(v);
+                } else {
+                    payload[k] = v;
+                }
+            });
+
+            try {
+                const r = await fetch(API_URL, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+                if (!r.ok) {
+                    const err = await r.json().catch(()=>({detail:'Server error'}));
+                    throw new Error(err.detail || 'Server error');
+                }
+                const j = await r.json();
+                // Update chart
+                const p = j.default_probability;
+                const isHighRisk = j.prediction_status === 1;
+                const riskColor = isHighRisk ? '#dc2626' : '#059669'; // Red or Green for risk level text
+                
+                probChart.data.datasets[0].data = [p, 1-p];
+                probChart.data.datasets[0].backgroundColor = [isHighRisk ? '#ef4444' : '#f87171', isHighRisk ? '#10b981' : '#34d399'];
+                probChart.update();
+                
+                const riskLabel = document.getElementById('riskLabel');
+                riskLabel.innerText = j.risk_level;
+                riskLabel.style.color = riskColor;
+                document.getElementById('probPercent').innerText = (p*100).toFixed(2) + '%';
+                document.getElementById('recommendationText').innerText = j.recommendation;
+
+                renderContributions(j.feature_contributions || {});
+                // refresh history and stats
+                await fetchHistory();
+                await fetchStats();
+            } catch (err) {
+                alert('Prediction failed: ' + err.message);
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        });
+
+        // Explain (SHAP) button
+        document.getElementById('explainBtn').addEventListener('click', async () => {
+            loadingIndicator.classList.remove('hidden');
+            const fd = new FormData(form);
+            const payload = {};
+            const numericKeys = ['rate_of_interest','Interest_rate_spread','Upfront_charges','term','income','Credit_Score','LTV','dtir1'];
+            fd.forEach((v,k) => {
+                if (numericKeys.includes(k)) {
+                    payload[k] = parseFloat(v);
+                } else {
+                    payload[k] = v;
+                }
+            });
+            try {
+                const r = await fetch(window.location.origin + '/explain', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+                if (!r.ok) {
+                    const err = await r.json().catch(()=>({detail:'Explain failed'}));
+                    throw new Error(err.detail || 'Explain failed');
+                }
+                const j = await r.json();
+                renderContributions(j.shap_values || {});
+            } catch (e) {
+                alert('Explain failed: ' + e.message);
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        });
+
+        // Export PDF
+        document.getElementById('exportBtn').addEventListener('click', async () => {
+            loadingIndicator.classList.remove('hidden');
+            const fd = new FormData(form);
+            const payload = {};
+            const numericKeys = ['rate_of_interest','Interest_rate_spread','Upfront_charges','term','income','Credit_Score','LTV','dtir1'];
+            fd.forEach((v,k) => {
+                if (numericKeys.includes(k)) {
+                    payload[k] = parseFloat(v);
+                } else {
+                    payload[k] = v;
+                }
+            });
+            try {
+                const r = await fetch(window.location.origin + '/export_report', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+                if (!r.ok) {
+                    const err = await r.json().catch(()=>({detail:'Export failed'}));
+                    throw new Error(err.detail || 'Export failed');
+                }
+                const blob = await r.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'prediction_report_' + new Date().toISOString().slice(0, 10) + '.pdf';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            } catch (e) {
+                alert('Export failed: ' + e.message);
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', ()=>{ form.reset(); });
+
+        // on load
+        fetchHistory();
+        fetchStats();
+    </script>
+</body>
+</html>

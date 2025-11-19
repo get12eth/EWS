@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+pandas
+numpy
+joblib
+pydantic
+python-multipart
+shap
+reportlab
+sqlalchemy
+psycopg2-binary
+matplotlib
+Pillow
+redis
+passlib[bcrypt]

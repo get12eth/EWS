@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Risk Management — Bank EWS Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Global & Custom Layout Styling (Consistent with Dashboard) */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: #f4f7f9; display: flex; min-height: 100vh; margin: 0; }
+        .sidebar { width: 250px; background-color: #ffffff; box-shadow: 2px 0 5px rgba(0,0,0,0.05); padding: 20px 0; display: flex; flex-direction: column; flex-shrink: 0; }
+        .main-content-wrapper { flex-grow: 1; display: flex; flex-direction: column; }
+        .header { background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .content-area { flex-grow: 1; padding: 30px; max-width: 100%; }
+        .logo { font-size: 20px; font-weight: 800; color: #4f46e5; padding: 0 20px 20px; border-bottom: 1px solid #f3f4f6; margin-bottom: 10px; }
+        .nav-item { padding: 10px 20px; color: #4b5563; text-decoration: none; display: flex; align-items: center; gap: 10px; font-weight: 500; transition: background-color 0.2s, color 0.2s; cursor: pointer; }
+        .nav-item:hover, .nav-item.active { background-color: #eef2ff; color: #4f46e5; border-right: 3px solid #4f46e5; }
+        .card { box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 12px; border: 1px solid #e5e7eb; background: white; padding: 24px; }
+        /* Alert severity indicators */
+        .alert-card { border-left: 4px solid #f59e0b; }
+        .alert-card.critical { border-left-color: #ef4444; }
+        .alert-card.high { border-left-color: #f97316; }
+        .alert-card.medium { border-left-color: #eab308; }
+        .alert-card.low { border-left-color: #22c55e; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">EWS Portal</div>
+        <nav>
+            <div class="nav-item" id="navDashboard">📊 Dashboard</div>
+            <div class="nav-item active" id="navRisk">📈 Risk Management</div>
+            <div class="nav-item" id="navModels">🧠 Model Performance</div>
+            <div class="nav-item" id="navAdmin">⚙️ Admin Portal</div>
+        </nav>
+    </aside>
+
+    <div class="main-content-wrapper">
+        
+        <header class="header">
+            <h1 class="text-2xl font-bold text-gray-800">Risk Management Dashboard</h1>
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2 text-sm text-gray-600">
+                    <svg class="w-5 h-5 text-indigo-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path></svg>
+                    <span>Welcome, Analyst</span>
+                </div>
+                <button id="logoutBtn" type="button" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition duration-150">Logout</button>
+            </div>
+        </header>
+
+        <main class="content-area">
+            <section class="mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold text-gray-800">Active Risk Alerts</h2>
+                    <button id="refreshAlerts" class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-200 transition duration-150">
+                        Refresh Alerts
+                    </button>
+                </div>
+                <div id="alertsContainer" class="grid grid-cols-1 gap-4">
+                    <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center text-gray-500">
+                        Loading alerts...
+                    </div>
+                </div>
+            </section>
+
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Risk Mitigation Strategies & Portfolio Heatmap</h2>
+                <p class="text-gray-600 mb-6">
+                    This module provides aggregate risk views, stress testing simulations, and suggested mitigation strategies for high-risk accounts.
+                </p>
+                <div class="p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800">
+                    <p class="font-medium">Placeholder Content:</p>
+                    <p class="text-sm">Future integration will display interactive charts for Value-at-Risk (VaR) and Expected Shortfall metrics, alongside a list of current high-risk loan segments.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="alertModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 class="text-lg font-semibold mb-4">Update Alert Status</h3>
+            <form id="alertActionForm">
+                <input type="hidden" id="alertId" value="">
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="alertStatus" class="w-full p-2 border border-gray-300 rounded-lg">
+                        <option value="New">New</option>
+                        <option value="Under Review">Under Review</option>
+                        <option value="Mitigated">Mitigated</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Manager Notes</label>
+                    <textarea id="managerNotes" class="w-full p-2 border border-gray-300 rounded-lg" rows="3"></textarea>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Resolution Action (If Closed/Mitigated)</label>
+                    <textarea id="resolutionAction" class="w-full p-2 border border-gray-300 rounded-lg" rows="3"></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="document.getElementById('alertModal').classList.add('hidden')" 
+                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-150">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-150">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        // --- Navigation Handlers (Common to all HTML pages) ---
+        document.getElementById('navDashboard').addEventListener('click', () => { window.location.href = '/static/bank_dashboard.html'; });
+        document.getElementById('navRisk').addEventListener('click', () => { window.location.href = '/static/risk_management.html'; });
+        document.getElementById('navModels').addEventListener('click', () => { window.location.href = '/static/model_performance.html'; });
+        document.getElementById('navAdmin').addEventListener('click', () => { window.location.href = '/static/admin.html'; });
+        
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            const res = await fetch(API_BASE + '/admin-logout', { method: 'POST', credentials: 'same-origin' });
+            if (res.redirected) {
+              window.location.href = res.url;
+            } else {
+              // Fallback if the redirect status isn't caught
+              window.location.href = '/admin-login.html'; 
+            }
+        });
+
+        // --- Alert Management Logic ---
+
+        function getSeverityClass(severity) {
+            switch (severity.toLowerCase()) {
+                case 'high': return 'high';
+                case 'medium': return 'medium';
+                case 'low': return 'low';
+                case 'critical': return 'critical';
+                default: return 'medium'; 
+            }
+        }
+
+        function openAlertModal(alert) {
+            // Populate modal fields
+            document.getElementById('alertId').value = alert.id;
+            document.getElementById('alertStatus').value = alert.status;
+            document.getElementById('managerNotes').value = alert.manager_notes || '';
+            document.getElementById('resolutionAction').value = alert.resolution_action || '';
+            // Show the modal
+            document.getElementById('alertModal').classList.remove('hidden');
+        }
+
+        function renderAlerts(alerts) {
+            const container = document.getElementById('alertsContainer');
+            if (!alerts || alerts.length === 0) {
+                container.innerHTML = `<div class="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center text-gray-500">
+                    No active alerts at this time.
+                </div>`;
+                return;
+            }
+
+            container.innerHTML = alerts.map(alert => {
+                const severityClass = getSeverityClass(alert.severity);
+                const timestamp = new Date(alert.alert_timestamp).toLocaleString();
+                const statusColor = alert.status === 'New' ? 'bg-red-500' : 
+                                    alert.status === 'Under Review' ? 'bg-yellow-500' :
+                                    'bg-gray-500';
+
+                // Use the data-alert attribute to pass the full alert object to the click handler
+                return `
+                    <div class="alert-card ${severityClass} p-4 border border-gray-200 rounded-lg cursor-pointer transition duration-150 hover:shadow-lg" 
+                         data-alert='${JSON.stringify(alert)}' onclick="openAlertModal(JSON.parse(this.dataset.alert))">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-semibold text-gray-800">${alert.risk_signal}</h3>
+                                <p class="text-sm text-gray-600 mt-1">Entity ID: ${alert.entity_id}</p>
+                                <p class="text-sm text-gray-600">Risk Score: ${(alert.prediction_score * 100).toFixed(2)}%</p>
+                                <p class="text-xs text-gray-400 mt-2">Alert Time: ${timestamp}</p>
+                            </div>
+                            <div class="flex flex-col items-end space-y-1">
+                                <span class="text-xs font-bold uppercase py-1 px-2 rounded-full text-white ${statusColor}">
+                                    ${alert.status}
+                                </span>
+                                <span class="text-sm font-semibold text-${severityClass === 'high' ? 'red' : severityClass === 'medium' ? 'yellow' : 'green'}-700 uppercase">
+                                    ${alert.severity} Risk
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function loadAlerts() {
+            const container = document.getElementById('alertsContainer');
+            container.innerHTML = `<div class="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center text-gray-500">
+                Loading alerts...
+            </div>`;
+            try {
+                // Fetch alerts (only non-Closed status)
+                const response = await fetch(API_BASE + '/api/alerts', { credentials: 'same-origin' });
+                
+                if (response.status === 401) {
+                    // This is a redundant check, as middleware should redirect, but good practice
+                    window.location.href = '/admin-login.html'; 
+                    return;
+                }
+                if (!response.ok) throw new Error('Failed to fetch alerts');
+                
+                const alerts = await response.json();
+                renderAlerts(alerts);
+            } catch (error) {
+                console.error("Error loading alerts:", error);
+                container.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-lg text-center text-red-700">
+                    Failed to load alerts. Check API connection and authentication.
+                </div>`;
+            }
+        }
+
+        // Event listener for the modal form submission
+        document.getElementById('alertActionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const alertId = document.getElementById('alertId').value;
+            const status = document.getElementById('alertStatus').value;
+            const managerNotes = document.getElementById('managerNotes').value;
+            const resolutionAction = document.getElementById('resolutionAction').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/alerts/${alertId}/update_status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: status,
+                        manager_notes: managerNotes || null,
+                        resolution_action: resolutionAction || null
+                    })
+                });
+                
+                if (response.status === 401) {
+                    window.location.href = '/admin-login.html';
+                    return;
+                }
+                if (!response.ok) {
+                    const errorJson = await response.json().catch(() => ({detail: 'Failed to update alert'}));
+                    throw new Error(errorJson.detail || 'Failed to update alert');
+                }
+                
+                // Close modal and refresh alerts
+                document.getElementById('alertModal').classList.add('hidden');
+                loadAlerts();
+                
+                // Show success message
+                alert('Alert updated successfully!');
+            } catch (error) {
+                alert(`Error updating alert: ${error.message}`);
+            }
+        });
+
+        // Initialize on page load and attach to refresh button
+        document.addEventListener('DOMContentLoaded', loadAlerts);
+        document.getElementById('refreshAlerts').addEventListener('click', loadAlerts);
+        
+    </script>
+</body>
+</html>

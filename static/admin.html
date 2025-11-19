@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Portal - Bank EWS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* 1. Global & Typography (Consistent with Dashboard) */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+    body { font-family: 'Inter', Arial, Helvetica, sans-serif; margin: 0; background-color: #f4f7f9; color: #1f2937; display: flex; min-height: 100vh; }
+    
+    /* 2. Layout Structure (Consistent with Dashboard) */
+    .sidebar { width: 250px; background-color: #ffffff; box-shadow: 2px 0 5px rgba(0,0,0,0.05); padding: 20px 0; display: flex; flex-direction: column; flex-shrink: 0; }
+    .main-content-wrapper { flex-grow: 1; display: flex; flex-direction: column; }
+    .header { background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+    .content-area { flex-grow: 1; padding: 30px; }
+    .container { max-width: 100%; background-color: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; }
+    
+    /* 3. Sidebar Styling (Consistent with Dashboard) */
+    .logo { font-size: 20px; font-weight: 800; color: #4f46e5; padding: 0 20px 20px; border-bottom: 1px solid #f3f4f6; margin-bottom: 10px; }
+    .nav-item { padding: 10px 20px; color: #4b5563; text-decoration: none; display: flex; align-items: center; gap: 10px; font-weight: 500; transition: background-color 0.2s, color 0.2s; cursor: pointer; }
+    .nav-item:hover, .nav-item.active { background-color: #eef2ff; color: #4f46e5; border-right: 3px solid #4f46e5; }
+    
+    /* 4. Utility Components */
+    .status-indicator { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background-color: #10b981; /* Green: Operational */ }
+    
+    /* 5. Button Styling */
+    .btn { padding: 10px 16px; border-radius: 6px; background:#4f46e5; color:#fff; border:none; cursor:pointer; font-weight: 600; transition: background-color 0.2s, box-shadow 0.2s; font-size: 14px; }
+    .btn:hover { background: #4338ca; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+    .btn.secondary { background:#6b7280; }
+    .btn.secondary:hover { background:#4b5563; }
+    .btn.danger { background:#dc2626; }
+    .btn.danger:hover { background:#b91c1c; }
+    
+    /* 6. Content Specifics */
+    h1 { font-size: 24px; margin-bottom: 8px; color: #1f2937; }
+    p { color: #6b7280; margin-bottom: 20px; }
+    .action-group { display:flex; justify-content: flex-start; flex-wrap: wrap; gap:12px; margin-bottom:30px; padding-bottom: 20px; border-bottom: 1px solid #e5e7eb; }
+    #responseArea { margin-top: 20px; padding: 12px; border-radius: 6px; font-size: 14px; font-weight: 500; display: none; }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+      <div class="logo">EWS Portal</div>
+      <nav>
+          <div class="nav-item" id="navDashboard">📊 Dashboard</div>
+          <div class="nav-item" id="navRisk">📈 Risk Management</div>
+          <div class="nav-item" id="navModels">🧠 Model Performance</div>
+          <div class="nav-item active" id="navAdmin">⚙️ Admin Portal</div>
+      </nav>
+  </aside>
+
+  <div class="main-content-wrapper">
+
+    <header class="header">
+      <h1 class="text-2xl font-bold text-gray-800">System Administration</h1>
+      <div class="flex items-center space-x-4">
+        <div class="flex items-center space-x-2 text-sm text-gray-600">
+            <div class="status-dot"></div><span>System Operational</span>
+        </div>
+        <button id="logout" type="button" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition duration-150">Logout</button>
+      </div>
+    </header>
+
+    <main class="content-area">
+      <div class="container">
+        
+        <h2 style="font-size: 20px; margin-bottom: 20px; color: #374151;">⚙️ Model & Data Management</h2> 
+        
+        <p>Control the lifecycle of the prediction model and manage training data.</p>
+        <div class="action-group">
+          <button class="btn" id="loadModel">🧠 Load Model (If Unloaded)</button>
+          <button class="btn secondary" id="retrainModel">🔁 Retrain Model (Requires Data)</button>
+          <button class="btn danger" id="unloadModel">❌ Unload Model</button>
+        </div>
+
+        <h2 style="font-size: 20px; margin-bottom: 20px; color: #374151;">📊 History & Data Export Management</h2> 
+        <p>Manage prediction history archives and system data exports.</p>
+        <div class="action-group">
+          <button class="btn" id="exportCsv">⬇️ Export All History (CSV)</button>
+          <button class="btn secondary" id="exportCsvRecent">⬇️ Export Recent 100 (CSV)</button>
+          <button class="btn danger" id="clearHistory">🗑️ Clear All History</button>
+        </div>
+
+        <div id="responseArea" style="min-height: 40px;"></div>
+      </div>
+    </main>
+  </div>
+
+<script>
+    const responseArea = document.getElementById('responseArea');
+    const BASE_URL = window.location.origin;
+
+    // --- Utility Functions ---
+    async function showResponse(message, isError = false) {
+      responseArea.innerText = message;
+      responseArea.style.backgroundColor = isError ? '#fee2e2' : '#d1fae5'; /* Light red/green background */
+      responseArea.style.color = isError ? '#991b1b' : '#065f46'; /* Dark red/green text */
+      responseArea.style.display = 'block';
+      setTimeout(() => { responseArea.style.display = 'none'; }, 8000);
+    }
+    
+    // --- Navigation Handlers ---
+    document.getElementById('navDashboard').addEventListener('click', () => { window.location.href = '/static/bank_dashboard.html'; });
+    document.getElementById('navRisk').addEventListener('click', () => { window.location.href = '/static/risk_management.html'; });
+    document.getElementById('navModels').addEventListener('click', () => { window.location.href = '/static/model_performance.html'; });
+    document.getElementById('navAdmin').addEventListener('click', () => { window.location.href = '/static/admin.html'; });
+    
+    // --- Admin Action Logic ---
+    async function postAction(endpoint, successMessage, errorMessage) {
+        showResponse('Processing...', false);
+        try {
+            const res = await fetch(BASE_URL + endpoint, { method: 'POST', credentials: 'same-origin' });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({detail: 'Server error'}));
+                return showResponse(errorMessage + ': ' + (err.detail || 'Unknown error'), true);
+            }
+            const data = await res.json();
+            showResponse(data.message || successMessage, false);
+        } catch (e) {
+            showResponse('Network error: ' + e.message, true);
+        }
+    }
+
+    document.getElementById('loadModel').addEventListener('click', () => postAction('/load_model', 'Model loaded successfully!', 'Failed to load model'));
+    document.getElementById('retrainModel').addEventListener('click', () => postAction('/retrain_model', 'Model retraining initiated!', 'Failed to initiate retraining'));
+    document.getElementById('unloadModel').addEventListener('click', () => postAction('/unload_model', 'Model unloaded successfully!', 'Failed to unload model'));
+
+    // --- Export Logic ---
+    document.getElementById('exportCsv').addEventListener('click', async () => {
+      showResponse('Exporting all history...', false);
+      const res = await fetch(BASE_URL + '/export_history_csv', { credentials: 'same-origin' });
+      if (!res.ok) return showResponse('Export failed: ' + res.status, true);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'predictions_history_all.csv'; a.click();
+      URL.revokeObjectURL(url);
+      showResponse('All history exported!', false);
+    });
+    
+    document.getElementById('exportCsvRecent').addEventListener('click', async () => {
+      showResponse('Exporting recent history...', false);
+      const res = await fetch(BASE_URL + '/export_history_csv?limit=100', { credentials: 'same-origin' });
+      if (!res.ok) return showResponse('Export failed: ' + res.status, true);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'predictions_history_recent_100.csv'; a.click();
+      URL.revokeObjectURL(url);
+      showResponse('Recent history exported!', false);
+    });
+    
+    document.getElementById('clearHistory').addEventListener('click', async () => {
+      if (!confirm("Are you sure you want to permanently delete ALL prediction history? This action cannot be undone.")) 
+      {
+          return;
+      }
+      postAction('/clear_history', 'Prediction history cleared!', 'Clear history failed');
+    });
+
+    // --- Logout Fix ---
+    document.getElementById('logout').addEventListener('click', async () => {
+      const res = await fetch(BASE_URL + '/admin-logout', { method: 'POST', credentials: 'same-origin' });
+      if (res.redirected) {
+        window.location.href = res.url;
+      } else {
+        window.location.href = '/admin-login.html';
+      }
+    });
+
+  </script>
+</body>
+</html>

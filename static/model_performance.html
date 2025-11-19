@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Model Performance — Bank EWS Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Global & Custom Layout Styling (Consistent with Dashboard) */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: #f4f7f9; display: flex; min-height: 100vh; margin: 0; }
+        .sidebar { width: 250px; background-color: #ffffff; box-shadow: 2px 0 5px rgba(0,0,0,0.05); padding: 20px 0; display: flex; flex-direction: column; flex-shrink: 0; }
+        .main-content-wrapper { flex-grow: 1; display: flex; flex-direction: column; }
+        .header { background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .content-area { flex-grow: 1; padding: 30px; max-width: 100%; }
+        .logo { font-size: 20px; font-weight: 800; color: #4f46e5; padding: 0 20px 20px; border-bottom: 1px solid #f3f4f6; margin-bottom: 10px; }
+        .nav-item { padding: 10px 20px; color: #4b5563; text-decoration: none; display: flex; align-items: center; gap: 10px; font-weight: 500; transition: background-color 0.2s, color 0.2s; cursor: pointer; }
+        .nav-item:hover, .nav-item.active { background-color: #eef2ff; color: #4f46e5; border-right: 3px solid #4f46e5; }
+        .card { box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 12px; border: 1px solid #e5e7eb; background: white; padding: 24px; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">EWS Portal</div>
+        <nav>
+            <div class="nav-item" id="navDashboard">📊 Dashboard</div>
+            <div class="nav-item" id="navRisk">📈 Risk Management</div>
+            <div class="nav-item active" id="navModels">🧠 Model Performance</div>
+            <div class="nav-item" id="navAdmin">⚙️ Admin Portal</div>
+        </nav>
+    </aside>
+
+    <div class="main-content-wrapper">
+        
+        <header class="header">
+            <h1 class="text-2xl font-bold text-gray-800">Model Performance Monitoring</h1>
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2 text-sm text-gray-600">
+                    <svg class="w-5 h-5 text-indigo-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path></svg>
+                    <span>Welcome, Analyst</span>
+                </div>
+                <button id="logoutBtn" type="button" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition duration-150">Logout</button>
+            </div>
+        </header>
+
+        <main class="content-area">
+            <div class="card">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Model Stability and Drift Analysis</h2>
+                <p class="text-gray-600 mb-6">
+                    This module allows you to track key performance indicators (KPIs) like AUC, F1-Score, and accuracy over time to detect model drift.
+                </p>
+                <div class="p-4 bg-indigo-50 border-l-4 border-indigo-400 text-indigo-800">
+                    <p class="font-medium">Placeholder Content:</p>
+                    <p class="text-sm">Future implementation will feature time-series charts for performance metrics, confusion matrices, and feature importance drift detection alerts.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- Navigation Handlers ---
+        document.getElementById('navDashboard').addEventListener('click', () => { window.location.href = '/static/bank_dashboard.html'; });
+        document.getElementById('navRisk').addEventListener('click', () => { window.location.href = '/static/risk_management.html'; });
+        document.getElementById('navModels').addEventListener('click', () => { window.location.href = '/static/model_performance.html'; });
+        document.getElementById('navAdmin').addEventListener('click', () => { window.location.href = '/static/admin.html'; });
+        
+        // --- Logout Fix ---
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            const res = await fetch(window.location.origin + '/admin-logout', { method: 'POST', credentials: 'same-origin' });
+            if (res.redirected) {
+              window.location.href = res.url;
+            } else {
+              window.location.href = '/admin-login.html'; 
+            }
+        });
+    </script>
+</body>
+</html>
