@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Model Performance — Bank EWS Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* Global & Custom Layout Styling (Consistent with Dashboard) */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
@@ -16,7 +17,7 @@
         .logo { font-size: 20px; font-weight: 800; color: #4f46e5; padding: 0 20px 20px; border-bottom: 1px solid #f3f4f6; margin-bottom: 10px; }
         .nav-item { padding: 10px 20px; color: #4b5563; text-decoration: none; display: flex; align-items: center; gap: 10px; font-weight: 500; transition: background-color 0.2s, color 0.2s; cursor: pointer; }
         .nav-item:hover, .nav-item.active { background-color: #eef2ff; color: #4f46e5; border-right: 3px solid #4f46e5; }
-        .card { box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 12px; border: 1px solid #e5e7eb; background: white; padding: 24px; }
+        .card { box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 12px; border: 1px solid #e5e7eb; background: white; }
     </style>
 </head>
 <body>
@@ -45,15 +46,46 @@
         </header>
 
         <main class="content-area">
-            <div class="card">
-                <h2 class="text-xl font-semibold mb-4 text-gray-800">Model Stability and Drift Analysis</h2>
-                <p class="text-gray-600 mb-6">
-                    This module allows you to track key performance indicators (KPIs) like AUC, F1-Score, and accuracy over time to detect model drift.
-                </p>
-                <div class="p-4 bg-indigo-50 border-l-4 border-indigo-400 text-indigo-800">
-                    <p class="font-medium">Placeholder Content:</p>
-                    <p class="text-sm">Future implementation will feature time-series charts for performance metrics, confusion matrices, and feature importance drift detection alerts.</p>
-                </div>
+            <div class="max-w-full">
+                <h1 class="text-3xl font-bold mb-6 text-gray-800">Model Performance Monitoring</h1>
+
+                <section class="mb-8">
+                    <h2 class="text-xl font-semibold mb-3 text-gray-800">Key Performance Indicators (KPIs)</h2>
+                    <div id="kpi-cards" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="card p-4 bg-white shadow-md">
+                            <div class="text-sm font-medium text-gray-500">Latest AUC</div>
+                            <div id="kpi-auc" class="text-3xl font-bold text-indigo-600 mt-1">—</div>
+                            <div class="text-xs text-gray-500 mt-1" id="kpi-auc-time">Last updated: —</div>
+                        </div>
+                        <div class="card p-4 bg-white shadow-md">
+                            <div class="text-sm font-medium text-gray-500">Latest F1-Score</div>
+                            <div id="kpi-f1" class="text-3xl font-bold text-green-600 mt-1">—</div>
+                            <div class="text-xs text-gray-500 mt-1" id="kpi-f1-time">Last updated: —</div>
+                        </div>
+                        <div class="card p-4 bg-white shadow-md">
+                            <div class="text-sm font-medium text-gray-500">Latest Accuracy</div>
+                            <div id="kpi-accuracy" class="text-3xl font-bold text-yellow-600 mt-1">—</div>
+                            <div class="text-xs text-gray-500 mt-1" id="kpi-accuracy-time">Last updated: —</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mb-8">
+                    <h2 class="text-xl font-semibold mb-3 text-gray-800">Performance Over Time (Model Drift Detection)</h2>
+                    <div class="card p-6 mb-6">
+                        <h3 class="text-lg font-semibold mb-3">AUC Over Time</h3>
+                        <div style="height: 300px;"><canvas id="aucChart"></canvas></div>
+                    </div>
+                    <div class="card p-6 mb-6">
+                        <h3 class="text-lg font-semibold mb-3">F1-Score Over Time</h3>
+                        <div style="height: 300px;"><canvas id="f1Chart"></canvas></div>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-lg font-semibold mb-3">Accuracy Over Time</h3>
+                        <div style="height: 300px;"><canvas id="accuracyChart"></canvas></div>
+                    </div>
+                </section>
+
             </div>
         </main>
     </div>
@@ -65,7 +97,7 @@
         document.getElementById('navModels').addEventListener('click', () => { window.location.href = '/static/model_performance.html'; });
         document.getElementById('navAdmin').addEventListener('click', () => { window.location.href = '/static/admin.html'; });
         
-        // --- Logout Fix ---
+        // --- Logout Handler ---
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             const res = await fetch(window.location.origin + '/admin-logout', { method: 'POST', credentials: 'same-origin' });
             if (res.redirected) {
@@ -74,6 +106,141 @@
               window.location.href = '/admin-login.html'; 
             }
         });
+
+        // --- Model Performance Logic ---
+        const API_PERF_URL = window.location.origin + '/api/model_performance';
+        
+        let aucChart, f1Chart, accuracyChart;
+
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return '—';
+            // Use local format for user-friendliness
+            return new Date(timestamp).toLocaleString();
+        }
+
+        function createLineChart(ctx, label, data, color) {
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.map(d => formatTimestamp(d.timestamp)),
+                    datasets: [{
+                        label: label,
+                        data: data.map(d => d.value),
+                        borderColor: color,
+                        backgroundColor: color.replace('1)', '0.1)'), // Lighter fill
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 1.05, // Allow slightly over 1 for better visibility near the max
+                            title: {
+                                display: true,
+                                text: 'Score'
+                            }
+                        },
+                        x: {
+                             // Use 'time' or 'category' scale based on how you want to display timestamps
+                             type: 'category',
+                             title: {
+                                display: true,
+                                text: 'Evaluation Time'
+                             }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const rawData = data[context.dataIndex];
+                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(4)} (Test Size: ${rawData.test_size})`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function fetchPerformanceData() {
+            try {
+                const res = await fetch(API_PERF_URL, { credentials: 'same-origin' });
+                // If the API returns 401 (Unauthorized), redirect to login
+                if (res.status === 401) {
+                    window.location.href = '/admin-login.html';
+                    return;
+                }
+                if (!res.ok) {
+                    throw new Error('Failed to fetch performance data');
+                }
+                const data = await res.json();
+                
+                // --- Update KPI Cards ---
+                const updateKPI = (metric, id) => {
+                    const metricData = data[metric] || [];
+                    // Sort by timestamp to get the latest entry
+                    const sortedData = metricData.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                    const latest = sortedData.length > 0 ? sortedData[sortedData.length - 1] : null;
+
+                    document.getElementById(`kpi-${id}`).innerText = latest ? latest.value.toFixed(4) : 'N/A';
+                    document.getElementById(`kpi-${id}-time`).innerText = latest ? `Last updated: ${formatTimestamp(latest.timestamp)}` : 'Last updated: N/A';
+                };
+
+                updateKPI('AUC', 'auc');
+                updateKPI('F1-Score', 'f1');
+                updateKPI('Accuracy', 'accuracy');
+
+                // --- Render Charts ---
+                const renderChart = (chartVar, elementId, label, metricData, color) => {
+                    const ctx = document.getElementById(elementId).getContext('2d');
+                    if (chartVar) {
+                        chartVar.destroy(); 
+                    }
+                    if (metricData && metricData.length > 0) {
+                        // Return the new Chart instance
+                        return createLineChart(ctx, label, metricData, color);
+                    } else {
+                        // Clear canvas and display no data message
+                        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                        ctx.font = '16px Inter';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillStyle = '#6b7280'; // gray-500
+                        ctx.fillText('No data available for this metric', ctx.canvas.width/2, ctx.canvas.height/2);
+                        return null;
+                    }
+                };
+
+                // Destroy old charts to prevent memory leaks and re-render
+                aucChart = renderChart(aucChart, 'aucChart', 'AUC', data['AUC'], 'rgba(79, 70, 229, 1)'); // Indigo
+                f1Chart = renderChart(f1Chart, 'f1Chart', 'F1-Score', data['F1-Score'], 'rgba(5, 150, 105, 1)'); // Green
+                accuracyChart = renderChart(accuracyChart, 'accuracyChart', 'Accuracy', data['Accuracy'], 'rgba(234, 179, 8, 1)'); // Yellow
+                
+            } catch (error) {
+                console.error('Error fetching performance data:', error);
+                document.getElementById('kpi-cards').innerHTML = `<div class="md:col-span-3 p-4 bg-red-100 text-red-800 rounded-lg">Error loading performance data. Check server status or API endpoint.</div>`;
+            }
+        }
+
+        // Fetch data on load
+        fetchPerformanceData();
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+    // Note: The admin.html file uses 'logout' instead of 'logoutBtn'
+    // If your admin.html uses 'logout', use that ID: document.getElementById('logout').addEventListener(...)
+    const res = await fetch(window.location.origin + '/admin-logout', { method: 'POST', credentials: 'same-origin' });
+    if (res.redirected) {
+      window.location.href = res.url;
+    } else {
+      window.location.href = '/admin-login.html'; 
+    }
+});
     </script>
 </body>
 </html>

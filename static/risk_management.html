@@ -272,6 +272,16 @@
         document.addEventListener('DOMContentLoaded', loadAlerts);
         document.getElementById('refreshAlerts').addEventListener('click', loadAlerts);
         
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+    // Note: The admin.html file uses 'logout' instead of 'logoutBtn'
+    // If your admin.html uses 'logout', use that ID: document.getElementById('logout').addEventListener(...)
+    const res = await fetch(window.location.origin + '/admin-logout', { method: 'POST', credentials: 'same-origin' });
+    if (res.redirected) {
+      window.location.href = res.url;
+    } else {
+      window.location.href = '/admin-login.html'; 
+    }
+});
     </script>
 </body>
 </html>
