@@ -9,7 +9,7 @@
     <style>
         /* Global & Custom Layout Styling (Consistent with Dashboard) */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-        body { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: #f4f7f9; display: flex; min-height: 100vh; margin: 0; }
+        body { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: #f4f7f9; display: flex; min-height: 10vh; margin: 0; }
         .sidebar { width: 250px; background-color: #ffffff; box-shadow: 2px 0 5px rgba(0,0,0,0.05); padding: 20px 0; display: flex; flex-direction: column; flex-shrink: 0; }
         .main-content-wrapper { flex-grow: 1; display: flex; flex-direction: column; }
         .header { background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
@@ -91,13 +91,16 @@
     </div>
 
     <script>
-        // --- Navigation Handlers ---
+        //--- Navigation Handlers ---
+
+
         document.getElementById('navDashboard').addEventListener('click', () => { window.location.href = '/static/bank_dashboard.html'; });
         document.getElementById('navRisk').addEventListener('click', () => { window.location.href = '/static/risk_management.html'; });
         document.getElementById('navModels').addEventListener('click', () => { window.location.href = '/static/model_performance.html'; });
         document.getElementById('navAdmin').addEventListener('click', () => { window.location.href = '/static/admin.html'; });
         
-        // --- Logout Handler ---
+
+        //--- Logout Handler ---
         document.getElementById('logoutBtn').addEventListener('click', async () => {
             const res = await fetch(window.location.origin + '/admin-logout', { method: 'POST', credentials: 'same-origin' });
             if (res.redirected) {
@@ -107,14 +110,14 @@
             }
         });
 
-        // --- Model Performance Logic ---
+        //--- Model Performance Logic ---
         const API_PERF_URL = window.location.origin + '/api/model_performance';
         
         let aucChart, f1Chart, accuracyChart;
 
         function formatTimestamp(timestamp) {
             if (!timestamp) return '—';
-            // Use local format for user-friendliness
+            //Use local format for user-friendliness
             return new Date(timestamp).toLocaleString();
         }
 
@@ -122,6 +125,8 @@
             return new Chart(ctx, {
                 type: 'line',
                 data: {
+                    //Use a custom function to format the timestamp strings for the labels
+
                     labels: data.map(d => formatTimestamp(d.timestamp)),
                     datasets: [{
                         label: label,
@@ -139,14 +144,18 @@
                     scales: {
                         y: {
                             min: 0,
-                            max: 1.05, // Allow slightly over 1 for better visibility near the max
+                            max: 1.05, 
+                            
+                            //Allow slightly over 1 for better visibility near the max
+
+
                             title: {
                                 display: true,
                                 text: 'Score'
                             }
                         },
                         x: {
-                             // Use 'time' or 'category' scale based on how you want to display timestamps
+                             //Use 'category' scale for time-series where labels are already formatted strings
                              type: 'category',
                              title: {
                                 display: true,
@@ -185,11 +194,12 @@
                 // --- Update KPI Cards ---
                 const updateKPI = (metric, id) => {
                     const metricData = data[metric] || [];
-                    // Sort by timestamp to get the latest entry
+                    // Sort by timestamp to get the latest entry (important since API returns oldest first)
                     const sortedData = metricData.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
                     const latest = sortedData.length > 0 ? sortedData[sortedData.length - 1] : null;
 
-                    document.getElementById(`kpi-${id}`).innerText = latest ? latest.value.toFixed(4) : 'N/A';
+                    // Use metric_value instead of value since that's what the API returns
+                    document.getElementById(`kpi-${id}`).innerText = latest ? latest.metric_value.toFixed(4) : 'N/A';
                     document.getElementById(`kpi-${id}-time`).innerText = latest ? `Last updated: ${formatTimestamp(latest.timestamp)}` : 'Last updated: N/A';
                 };
 
@@ -198,14 +208,21 @@
                 updateKPI('Accuracy', 'accuracy');
 
                 // --- Render Charts ---
+                // Modify the chart rendering to use metric_value instead of value
                 const renderChart = (chartVar, elementId, label, metricData, color) => {
                     const ctx = document.getElementById(elementId).getContext('2d');
                     if (chartVar) {
                         chartVar.destroy(); 
                     }
                     if (metricData && metricData.length > 0) {
+                        // Transform the data to match what the chart expects
+                        const chartData = metricData.map(item => ({
+                            timestamp: item.timestamp,
+                            value: item.metric_value,
+                            test_size: item.test_size
+                        }));
                         // Return the new Chart instance
-                        return createLineChart(ctx, label, metricData, color);
+                        return createLineChart(ctx, label, chartData, color);
                     } else {
                         // Clear canvas and display no data message
                         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -218,7 +235,8 @@
                     }
                 };
 
-                // Destroy old charts to prevent memory leaks and re-render
+                //Destroy old charts to prevent memory leaks and re-render
+
                 aucChart = renderChart(aucChart, 'aucChart', 'AUC', data['AUC'], 'rgba(79, 70, 229, 1)'); // Indigo
                 f1Chart = renderChart(f1Chart, 'f1Chart', 'F1-Score', data['F1-Score'], 'rgba(5, 150, 105, 1)'); // Green
                 accuracyChart = renderChart(accuracyChart, 'accuracyChart', 'Accuracy', data['Accuracy'], 'rgba(234, 179, 8, 1)'); // Yellow
@@ -229,7 +247,8 @@
             }
         }
 
-        // Fetch data on load
+        //Fetch data on load
+
         fetchPerformanceData();
 document.getElementById('logoutBtn').addEventListener('click', async () => {
     // Note: The admin.html file uses 'logout' instead of 'logoutBtn'

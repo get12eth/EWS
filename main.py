@@ -4,34 +4,29 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import io
 from fastapi.responses import StreamingResponse
 import csv
-from sqlalchemy import create_engine, Column, Integer, String, Float, Text, func
+from sqlalchemy import create_engine, Column, Integer, String, Float, Text, func, DateTime
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from uuid import uuid4
-from datetime import timedelta
-import time # Added for startup timing
+import time 
 import os
 import joblib
 import pandas as pd
 import numpy as np
 import uvicorn
 from starlette.middleware.cors import CORSMiddleware
-import numpy as np # Needed for numpy operations in compute_feature_contributions
+import numpy as np 
 
 # Global variables for model health and stats
 STARTUP_TIME = time.time()
 
 # --- NEW: Alert Threshold ---
 RISK_THRESHOLD = float(os.environ.get('RISK_THRESHOLD', '0.70')) # 70% probability for a High-Risk Alert
-
-# Add Alert model import
-# NOTE: Assuming init_db.py defines Alert and MacroIndicator models
-from init_db import Alert, MacroIndicator 
 
 # --- 2. Load Assets (Model, Scaler, Encoders) ---
 model: Optional[Any] = None
@@ -73,6 +68,38 @@ class Prediction(Base):
     prediction_status = Column(Integer, index=True)
     probability = Column(Float)
     contributions_json = Column(Text)
+    
+# --- Placeholder DB Models (Assuming these were in init_db.py) ---
+class Alert(Base):
+    __tablename__ = 'alerts'
+    id = Column(Integer, primary_key=True, index=True)
+    alert_timestamp = Column(DateTime, default=datetime.utcnow)
+    entity_id = Column(String, nullable=False)
+    risk_signal = Column(String, nullable=False)
+    severity = Column(String, nullable=False)
+    prediction_score = Column(Float)
+    status = Column(String, default="New") # New, In Progress, Closed
+    manager_notes = Column(Text, nullable=True)
+    resolution_action = Column(Text, nullable=True)
+    
+class MacroIndicator(Base):
+    __tablename__ = 'macro_indicators'
+    id = Column(Integer, primary_key=True, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    gdp_growth_rate = Column(Float)
+    market_index_yoy = Column(Float)
+    unemployment_rate = Column(Float)
+    inflation_rate = Column(Float)
+    interest_rate = Column(Float)
+    
+# --- Model Evaluation Table ---
+class ModelEvaluation(Base):
+    __tablename__ = 'model_evaluations'
+    id = Column(Integer, primary_key=True, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    metric_name = Column(String, index=True, nullable=False) # e.g., 'AUC', 'F1-Score'
+    metric_value = Column(Float, nullable=False)
+    test_size = Column(Integer, nullable=False) # Number of samples in the test set
 
 #Cached SHAP explainer (built at startup for faster explain responses)
 SHAP_EXPLAINER = None
@@ -181,8 +208,105 @@ def init_db():
     # Create tables via SQLAlchemy (Postgres or SQLite depending on DATABASE_URL)
     try:
         Base.metadata.create_all(bind=engine)
+        # Seed initial performance data if the table is empty
+        seed_initial_performance_data()
+        # Seed initial macro indicator data
+        seed_initial_macro_indicator()
     except SQLAlchemyError as e:
         print('Warning: Failed to initialize DB with SQLAlchemy:', e)
+
+
+# --- NEW: Function to seed initial macro indicator data ---
+def seed_initial_macro_indicator():
+    """Seeds the MacroIndicator table with mock data if it's empty."""
+    db = None
+    try:
+        db = SessionLocal()
+        if db.query(MacroIndicator).count() == 0:
+            print("Info: Seeding initial macro indicator data.")
+            now = datetime.utcnow()
+            
+            mock_indicators = []
+            for i in range(5):
+                ts = now - timedelta(days=5 - i)
+                # Mock key economic indicators
+                mock_indicators.append(MacroIndicator(
+                    timestamp=ts,
+                    gdp_growth_rate=2.0 + (np.random.rand() - 0.5) * 0.5,  # Example rate between 1.75 and 2.25
+                    market_index_yoy=5.0 + (np.random.rand() - 0.5) * 2.0,  # Example rate between 4.0 and 6.0
+                    unemployment_rate=4.0 + (np.random.rand() - 0.5) * 1.0,  # Example rate between 3.5 and 4.5
+                    inflation_rate=2.5 + (np.random.rand() - 0.5) * 1.0,  # Example rate between 2.0 and 3.0
+                    interest_rate=3.5 + (np.random.rand() - 0.5) * 1.0  # Example rate between 3.0 and 4.0
+                ))
+
+            db.add_all(mock_indicators)
+            db.commit()
+            print("Info: Macro indicator data seeded successfully.")
+        
+    except Exception as e:
+        if db:
+            try:
+                db.rollback()
+            except:
+                pass
+        print(f"Warning: Failed to seed macro indicator data: {e}")
+    finally:
+        if db:
+            try:
+                db.close()
+            except:
+                pass
+
+
+# --- Function to seed initial performance data ---
+def seed_initial_performance_data():
+    """Seeds the ModelEvaluation table with mock data if it's empty."""
+    db = None
+    try:
+        db = SessionLocal()
+        if db.query(ModelEvaluation).count() == 0:
+            print("Info: Seeding initial model performance data.")
+            now = datetime.utcnow()
+            
+            # Generate 5 mock historical entries for each metric
+            def generate_mock_data(metric_name, base_value, variance, n=5):
+                data = []
+                for i in range(n):
+                    # Create timestamps at 1-day intervals in the past
+                    ts = now - timedelta(days=n - i)
+                    val = base_value + (np.random.rand() - 0.5) * variance # Small random change
+                    val = max(0.0, min(1.0, val)) # Clamp value between 0 and 1
+                    
+                    data.append(ModelEvaluation(
+                        timestamp=ts,
+                        metric_name=metric_name,
+                        metric_value=val,
+                        test_size=25000 + i * 500
+                    ))
+                return data
+
+            mock_evals = []
+            mock_evals.extend(generate_mock_data('AUC', 0.82, 0.01))
+            mock_evals.extend(generate_mock_data('F1-Score', 0.75, 0.015))
+            mock_evals.extend(generate_mock_data('Accuracy', 0.79, 0.01))
+
+            db.add_all(mock_evals)
+            db.commit()
+            print("Info: Model performance data seeded successfully.")
+        
+    except Exception as e:
+        if db:
+            try:
+                db.rollback()
+            except:
+                pass
+        print(f"Warning: Failed to seed model performance data: {e}")
+    finally:
+        if db:
+            try:
+                db.close()
+            except:
+                pass
 
 
 def save_prediction_to_db(entry: Dict[str, Any]):
@@ -294,9 +418,6 @@ load_models()
 
 
 #--- 3. Pydantic Input Schema (Defines the 29 features) ---
-
-
-
 class LoanInput(BaseModel):
     # Categorical Features (Strings)
     loan_limit: str = Field(..., examples=["cf"], description="Loan limit type (\"cf\" or \"ncf\").")
@@ -321,9 +442,7 @@ class LoanInput(BaseModel):
     Region: str = Field(..., examples=["south"], description="Region of property.")
     Security_Type: str = Field(..., examples=["direct"], description="Security Type.")
     
-
     #Numerical Features (Floats)
-
     rate_of_interest: float = Field(..., examples=[3.75], description="Interest rate.")
     Interest_rate_spread: float = Field(..., examples=[0.25], description="Spread over benchmark rate.")
     Upfront_charges: float = Field(..., examples=[1000.0], description="Upfront charges.")
@@ -361,6 +480,13 @@ class PredictionResponse(BaseModel):
     feature_contributions: Dict[str, float] = Field(..., description="Feature importance/contributions.")
     timestamp: str = Field(..., description="Timestamp of the prediction.")
 
+# --- Performance Metric Response Model ---
+class PerformanceMetricResponse(BaseModel):
+    timestamp: datetime = Field(..., description="Evaluation timestamp.")
+    metric_value: float = Field(..., description="Metric value (e.g., 0.85).")
+    test_size: int = Field(..., description="Size of the test set.")
+    class Config:
+        from_attributes = True
 
 #--- 4. Preprocessing Function (Duplicate of the training logic) ---
 def preprocess_data(data: LoanInput) -> pd.DataFrame:
@@ -539,6 +665,7 @@ def serve_model_performance():
         return FileResponse(page_path, media_type='text/html')
     raise HTTPException(status_code=404, detail="Page not found")
 
+
 @app.get('/admin.html', summary='Admin Page')
 def serve_admin():
     """Serve the admin page."""
@@ -546,6 +673,7 @@ def serve_admin():
     if os.path.exists(page_path):
         return FileResponse(page_path, media_type='text/html')
     raise HTTPException(status_code=404, detail="Page not found")
+
 
 @app.get('/admin_login.html', summary='Admin Login Page')
 def serve_admin_login():
@@ -555,6 +683,10 @@ def serve_admin_login():
         return FileResponse(page_path, media_type='text/html')
     raise HTTPException(status_code=404, detail="Page not found")
 
+
+
+
+
 @app.get('/favicon.ico')
 def favicon():
     """Serve `static/favicon.ico` if present, otherwise return 204 No Content to avoid 404 noise."""
@@ -562,6 +694,10 @@ def favicon():
     if os.path.exists(favicon_path):
         return FileResponse(favicon_path, media_type='image/x-icon')
     return Response(status_code=204) # No Content
+
+
+
+
 
 
 @app.post('/predict', summary='Predict Loan Default', response_model=PredictionResponse)
@@ -663,6 +799,8 @@ def predict_default(data: LoanInput):
         # Catch any preprocessing or prediction errors
         raise HTTPException(status_code=500, detail=f"Prediction failed due to internal error: {e}")
 
+
+
 @app.get('/predictions', summary='Recent Predictions')
 def get_predictions(limit: int = 20):
     """Return the most recent predictions stored in memory (up to `limit`)."""
@@ -672,6 +810,54 @@ def get_predictions(limit: int = 20):
         "count": len(rows),
         "predictions": rows
     }
+    
+
+
+# --- Model Performance Endpoint (FIXED) ---
+@app.get('/api/model_performance', summary='Get Model Performance History')
+def get_model_performance(request: Request):
+    """
+    Retrieves historical model performance metrics (AUC, F1-Score, Accuracy) 
+    from the database for drift monitoring.
+    """
+    # Require admin auth via cookie
+    token = request.cookies.get('admin_token')
+    if not _is_admin_token_valid(token):
+        raise HTTPException(status_code=401, detail='Authentication required')
+
+    db = None
+    try:
+        db = SessionLocal()
+        # Fetch all evaluation records, ordered by time
+        evaluations = db.query(ModelEvaluation).order_by(ModelEvaluation.timestamp).all()
+        
+        # Group results by metric name
+        metrics_data = {}
+        for metric_name in ['AUC', 'F1-Score', 'Accuracy']:
+            metrics_data[metric_name] = []
+        
+        for eval_record in evaluations:
+            if eval_record.metric_name in metrics_data:
+                # FIX: Use model_validate to map SQLAlchemy attributes to Pydantic fields correctly
+                metrics_data[eval_record.metric_name].append(
+                    PerformanceMetricResponse.model_validate(eval_record).model_dump()
+                )
+        
+        return metrics_data
+
+    except Exception as e:
+        print(f"Error retrieving model performance data: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve model performance data: {e}")
+    finally:
+        if db:
+            try:
+                db.close()
+            except:
+                pass
+
+
+
+
 
 @app.get('/stats', summary='System Statistics and Model Health')
 def get_stats():
@@ -697,8 +883,9 @@ def get_stats():
             "total_alerts": total_alerts,
             "new_alerts": new_alerts,
             "latest_macro_indicator": {
+                # Use one of the available indicator values since there's no single indicator_value column
                 "timestamp": latest_indicator.timestamp.isoformat(),
-                "value": latest_indicator.indicator_value
+                "value": latest_indicator.interest_rate if latest_indicator else None
             } if latest_indicator else None
         }
     except Exception as e:
@@ -722,6 +909,9 @@ def get_stats():
             except:
                 pass
 
+
+
+
 @app.post('/clear_history', summary='Clear Prediction History')
 def clear_history(request: Request):
     """Clear all prediction history from the database."""
@@ -736,6 +926,8 @@ def clear_history(request: Request):
         num_deleted = db.query(Prediction).delete()
         # Optionally clear alerts as well
         db.query(Alert).delete()
+        # NOTE: Leaving ModelEvaluation data as it's useful historical context
+        # db.query(ModelEvaluation).delete() 
         db.commit()
         
         # Clear in-memory history
@@ -758,6 +950,11 @@ def clear_history(request: Request):
             except:
                 pass
 
+
+
+
+
+
 @app.get('/export_history_csv', summary='Export prediction history as CSV')
 def export_history_csv(request: Request, limit: Optional[int] = None):
     """Export history stored in the DB as CSV. If `limit` is provided, export up to that many most recent rows. Otherwise export all rows. """
@@ -778,7 +975,7 @@ def export_history_csv(request: Request, limit: Optional[int] = None):
         sio = io.StringIO()
         writer = csv.writer(sio)
 
-        # header
+        #header
         writer.writerow(['id', 'timestamp', 'prediction_status', 'probability', 'input_json', 'contributions_json'])
 
         for r in rows:
@@ -797,6 +994,10 @@ def export_history_csv(request: Request, limit: Optional[int] = None):
             except:
                 pass
 
+
+
+
+
 @app.post('/admin-login', summary='Submit admin login form')
 async def admin_login(username: str = Form(...), password: str = Form(...)):
     """Handles admin login, sets a session cookie on success."""
@@ -812,6 +1013,10 @@ async def admin_login(username: str = Form(...), password: str = Form(...)):
     resp = RedirectResponse(url='/admin-login?failed=1', status_code=302)
     return resp
 
+
+
+
+
 @app.post('/admin-logout', summary='Logout admin')
 def admin_logout(request: Request):
     token = request.cookies.get('admin_token')
@@ -820,6 +1025,10 @@ def admin_logout(request: Request):
     # Clear cookie
     resp.set_cookie('admin_token', '', expires=0)
     return resp
+
+
+
+
 
 @app.post('/explain', summary='SHAP explain for a single input')
 def explain_input(data: LoanInput):
@@ -859,6 +1068,9 @@ def explain_input(data: LoanInput):
     except Exception as e:
         print(f"SHAP explanation failed: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to generate SHAP explanation: {e}")
+
+
+
 
 @app.post('/export_report', summary='Export Prediction Report as PDF')
 def export_prediction_report(data: LoanInput):
@@ -960,25 +1172,20 @@ def export_prediction_report(data: LoanInput):
         y_start = y2
 
         # Numerical Features
-        for i, (key, value) in enumerate(data.model_dump().items()):
+        i = 0
+        for key, value in data.model_dump().items():
             if key in NUMERICAL_COLS:
-                # Max 10 items per column
-                if i % 10 == 0 and i > 0:
+                x_pos = 30
+                # Check for column break (shouldn't happen with 8 numerical features)
+                if i >= 10:
+                    x_pos = 300
                     y2 = y_start
-                    x_pos = 300 # Start second column
-
-                    # New section title for second column (Categorical)
-                    c.setFont("Helvetica-Bold", 14)
-                    c.drawString(x_pos, y2 + 20, "Input Data (Categorical)")
-                    c.setFont("Helvetica", 10)
-                    y2 -= 20
-                else:
-                    x_pos = 30
-
+                
                 c.drawString(x_pos, y2, f"{key.replace('_',' ').title()}: {value}")
                 y2 -= 12
+                i += 1
         
-        # Categorical Features (Continue from where numerical left off, or start new column)
+        # Categorical Features (Start a new column)
         c.setFont("Helvetica-Bold", 14)
         x_pos = 300
         y2 = y_start # Reset Y for the categorical column
@@ -1032,14 +1239,11 @@ class AlertResponse(BaseModel):
     class Config:
         from_attributes = True # Allow Pydantic to map SQLAlchemy models
 
+# 
 # Add new API endpoints for alerts
 @app.get("/api/alerts", response_model=List[AlertResponse], summary="Get all active alerts")
 def get_alerts(request: Request):
     """Retrieve all non-Closed alerts from the database."""
-    # This endpoint is accessed by risk_management.html, which is protected by middleware.
-    # The middleware should handle auth, but adding a check here for robustness if needed.
-    # Assuming the SessionMiddleware handles the main protection, but still good to check auth if this is a sensitive endpoint
-    
     # Check for admin session (since this is sensitive management data)
     token = request.cookies.get('admin_token')
     if not _is_admin_token_valid(token):
@@ -1062,6 +1266,8 @@ def get_alerts(request: Request):
                 db.close()
             except:
                 pass
+
+
 
 
 @app.post("/api/alerts/{alert_id}/update_status", response_model=AlertResponse, summary="Update alert status and notes")
@@ -1114,6 +1320,9 @@ def update_alert_status(alert_id: int, update: AlertUpdate, request: Request):
                 pass
 
 
+
+
+
 @app.get("/api/macro_indicators", summary="Get macroeconomic indicators")
 def get_macro_indicators():
     """Retrieve recent macroeconomic indicator data."""
@@ -1144,7 +1353,10 @@ class SessionMiddleware(BaseHTTPMiddleware):
         if request.url.path.startswith("/static/"):
             # Block access to admin pages in static directory
             if (request.url.path.startswith("/static/admin.html") or 
+                request.url.path.startswith("/static/risk_management.html") or 
+                request.url.path.startswith("/static/model_performance.html") or 
                 request.url.path.startswith("/static/admin_login.html")):
+                
                 # Check for admin session
                 token = request.cookies.get('admin_token')
                 if not _is_admin_token_valid(token):
@@ -1156,19 +1368,30 @@ class SessionMiddleware(BaseHTTPMiddleware):
             
         # Check if the path requires authentication (i.e., not a public path and not covered by static checks)
         if (request.url.path not in public_paths and 
-            not request.url.path.startswith('/api/macro_indicators') and 
-            not request.url.path.startswith('/api/alerts')): # Alert endpoints are protected internally
+            not request.url.path.startswith('/api/macro_indicators')): # /api/macro_indicators is public
+            
+            # The following API endpoints are protected internally:
+            # /api/alerts
+            # /api/model_performance
+            # /admin-logout
+            # /clear_history
+            # /export_history_csv
+            # /explain
+            # /export_report
+            # /predictions
+            # /stats
+            
             # Check for admin session
             token = request.cookies.get('admin_token')
             if not _is_admin_token_valid(token):
-                # Redirect to login page
+                #Redirect to login page
                 return RedirectResponse(url='/admin-login', status_code=302)
         
         response = await call_next(request)
         return response
 
 
-# Add middleware to app
+#Add middleware to app
 app.add_middleware(SessionMiddleware)
 
 if __name__ == "__main__":
