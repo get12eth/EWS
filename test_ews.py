@@ -14,6 +14,10 @@ BASE_URL = "http://localhost:8000"
 # Create a session to handle cookies
 session = requests.Session()
 
+
+
+
+
 def login():
     """Login to the system to get authentication cookies."""
     # Default credentials from the app
@@ -33,6 +37,10 @@ def login():
     except Exception as e:
         print(f"Login error: {e}")
         return False
+
+
+
+
 
 def test_macro_indicators():
     """Test adding and retrieving macroeconomic indicators."""
@@ -58,6 +66,8 @@ def test_macro_indicators():
     if response.status_code == 200:
         print(f"Response: {response.json()}")
 
+
+
 def test_alerts():
     """Test alerts functionality."""
     print("\nTesting alerts...")
@@ -72,6 +82,10 @@ def test_alerts():
             print(f"  - ID: {alert['id']}, Signal: {alert['risk_signal']}, Severity: {alert['severity']}, Score: {alert['prediction_score']}")
     else:
         print(f"Failed to get alerts: {response.status_code}")
+
+
+
+
 
 def test_create_test_alert():
     """Create a test alert directly via API to verify alert functionality."""
@@ -120,6 +134,11 @@ def test_create_test_alert():
         # Check alerts after prediction
         print("\nChecking alerts after prediction...")
         test_alerts()
+
+
+
+
+
 
 def test_alert_update():
     """Test updating an alert."""

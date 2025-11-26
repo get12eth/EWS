@@ -1,8 +1,10 @@
 import requests
 import json
 
-# Test the model performance API endpoint
+#Test the model performance API endpoint
 url = "http://localhost:8000/api/model_performance"
+
+
 
 try:
     response = requests.get(url)
@@ -14,5 +16,7 @@ try:
     else:
         print(f"Error: {response.text}")
 except Exception as e:
+
+    
     print(f"Failed to connect to API: {e}")
     print("Make sure the server is running on http://localhost:8000")

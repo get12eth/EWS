@@ -1336,14 +1336,14 @@ def get_macro_indicators():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve macroeconomic indicators: {e}")
     finally:
-        # Always close the database connection if it was opened
+        #Always close the database connection if it was opened
         if db:
             try:
                 db.close()
             except:
                 pass
 
-# Session Middleware to protect routes
+#Session Middleware to protect routes
 class SessionMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # Paths that do NOT require authentication
@@ -1357,16 +1357,16 @@ class SessionMiddleware(BaseHTTPMiddleware):
                 request.url.path.startswith("/static/model_performance.html") or 
                 request.url.path.startswith("/static/admin_login.html")):
                 
-                # Check for admin session
+                #Check for admin session
                 token = request.cookies.get('admin_token')
                 if not _is_admin_token_valid(token):
                     # Redirect to login page
                     return RedirectResponse(url='/admin-login', status_code=302)
-            # Allow all other static files
+            #Allow all other static files
             response = await call_next(request)
             return response
             
-        # Check if the path requires authentication (i.e., not a public path and not covered by static checks)
+        #Check if the path requires authentication (i.e., not a public path and not covered by static checks)
         if (request.url.path not in public_paths and 
             not request.url.path.startswith('/api/macro_indicators')): # /api/macro_indicators is public
             

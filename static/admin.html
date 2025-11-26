@@ -103,13 +103,19 @@
       setTimeout(() => { responseArea.style.display = 'none'; }, 8000);
     }
     
-    // --- Navigation Handlers ---
+
+
+    //--- Navigation Handlers ---
+    
     document.getElementById('navDashboard').addEventListener('click', () => { window.location.href = '/static/bank_dashboard.html'; });
     document.getElementById('navRisk').addEventListener('click', () => { window.location.href = '/static/risk_management.html'; });
     document.getElementById('navModels').addEventListener('click', () => { window.location.href = '/static/model_performance.html'; });
     document.getElementById('navAdmin').addEventListener('click', () => { window.location.href = '/static/admin.html'; });
     
-    // --- Admin Action Logic ---
+
+
+    //--- Admin Action Logic ---
+
     async function postAction(endpoint, successMessage, errorMessage) {
         showResponse('Processing...', false);
         try {
@@ -125,6 +131,7 @@
         }
     }
 
+    
     document.getElementById('loadModel').addEventListener('click', () => postAction('/load_model', 'Model loaded successfully!', 'Failed to load model'));
     document.getElementById('retrainModel').addEventListener('click', () => postAction('/retrain_model', 'Model retraining initiated!', 'Failed to initiate retraining'));
     document.getElementById('unloadModel').addEventListener('click', () => postAction('/unload_model', 'Model unloaded successfully!', 'Failed to unload model'));
@@ -154,6 +161,7 @@
       showResponse('Recent history exported!', false);
     });
     
+    
     document.getElementById('clearHistory').addEventListener('click', async () => {
       if (!confirm("Are you sure you want to permanently delete ALL prediction history? This action cannot be undone.")) 
       {
@@ -162,16 +170,16 @@
       postAction('/clear_history', 'Prediction history cleared!', 'Clear history failed');
     });
 
-    // --- Logout Fix ---
-    document.getElementById('logout').addEventListener('click', async () => {
-      const res = await fetch(BASE_URL + '/admin-logout', { method: 'POST', credentials: 'same-origin' });
-      if (res.redirected) {
-        window.location.href = res.url;
-      } else {
-        window.location.href = '/admin-login.html';
-      }
-    });
-
+   document.getElementById('logout').addEventListener('click', async () => {
+    // Note: The admin.html file uses 'logout' instead of 'logoutBtn'
+    // If your admin.html uses 'logout', use that ID: document.getElementById('logout').addEventListener(...)
+    const res = await fetch(window.location.origin + '/admin-logout', { method: 'POST', credentials: 'same-origin' });
+    if (res.redirected) {
+      window.location.href = res.url;
+    } else {
+      window.location.href = '/admin-login.html'; 
+    }
+});
   </script>
 </body>
 </html>
