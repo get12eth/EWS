@@ -7,73 +7,47 @@
   <style>
     :root{--bg:#0f1724;--card:#ffffff;--accent:#4f46e5;--muted:#6b7280;--text:#1f2937;--input-bg:#f9fafb}
     body{font-family:Inter,system-ui,Arial;background-color:#e5e7eb;color:var(--text);display:flex;align-items:center;justify-content:center;height:100vh;margin:0}
-    .card{background:var(--card);padding:32px;border-radius:16px;box-shadow:0 12px 24px rgba(0,0,0,0.1);width:400px;border: 1px solid #d1d5db;}
-    h1{margin:0 0 8px;font-size:24px;color:var(--text)}
+    .card{background:var(--card);padding:32px;border-radius:16px;box-shadow:0 12px 24px rgba(0,0,0,0.1);width:400px;border: 1px solid #d1d5db;text-align:center;}
+    .logo{max-width:200px;margin:0 auto 20px;display:block;}
+    h1{margin:0 0 20px;font-size:24px;color:var(--text);text-align:center}
     p{color:var(--muted);margin:0 0 20px}
-    label{display:block;font-size:14px;font-weight: 500; margin-bottom:6px; color:var(--text)}
-    input[type=text], input[type=password]{width:100%;padding:12px;border-radius:8px;border:1px solid #d1d5db;background:var(--input-bg);color:var(--text);margin-bottom:16px; transition: border-color 0.2s}
-    input[type=text]:focus, input[type=password]:focus{border-color:var(--accent); outline: none;}
-    .row{display:flex;gap:10px; justify-content: center;}
-    .btn{background:var(--accent);border:none;color:#fff;padding:12px 18px;border-radius:8px;cursor:pointer;font-weight: 600; transition: background-color 0.2s;}
-    .btn:hover{background:#4338ca;}
-    .small{font-size:12px;color:var(--muted);margin-top:16px}
-    .notice{background:#fef3c7;padding:10px;border-radius:8px;margin-bottom:16px; color:#92400e; border: 1px solid #fcd34d;}
-    a{color:var(--accent); text-decoration: none; transition: color 0.2s;}
-    a:hover{color:#4338ca;}
-    .password-reset { text-align: center; margin-top: 10px; }
+    label{display:block;font-size:14px;font-weight: 500; margin-bottom:6px; color:var(--text);text-align:left}
+    input[type=text], input[type=password]{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:8px;font-size:16px;box-sizing:border-box;margin-bottom:20px;background-color:var(--input-bg);transition:border-color .2s}
+    input[type=text]:focus, input[type=password]:focus{border-color:var(--accent);outline:none}
+    button{width:100%;padding:12px;background-color:var(--accent);color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;transition:background-color .2s}
+    button:hover{background-color:#4338ca}
+    .notice{padding:12px;margin-bottom:20px;border-radius:8px;font-size:14px;display:none}
+    .notice.error{background-color:#fee2e2;color:#ef4444;border:1px solid #fca5a5}
   </style>
+  <script>
+      function checkLoginError() {
+          const params = new URLSearchParams(window.location.search);
+          const notice = document.getElementById('notice');
+          if (params.get('error') === '1') {
+              notice.innerText = 'Login failed — Invalid credentials or session expired.';
+              notice.classList.add('error');
+              notice.style.display = 'block';
+              // Clean up the URL
+              history.replaceState({}, document.title, window.location.pathname);
+          }
+      }
+      document.addEventListener('DOMContentLoaded', checkLoginError);
+  </script>
 </head>
 <body>
   <div class="card">
-    <div style="text-align:center; margin-bottom: 24px;">
-      <div style="font-size:32px; color:var(--accent); margin-bottom: 8px;">🔒</div>
-      <h1>Admin Portal Login</h1>
-      <div style="color:var(--muted);font-size:14px">Access system exports and operational tools.</div>
-    </div>
-
-    <div id="notice" class="notice" style="display:none;color:#92400e"></div>
-
-    <form id="loginForm" method="post" action="/admin-login" style="margin-top:14px">
+    <img src="images/bank-logo.png.jpg" alt="Bank Logo" class="logo" />
+    <h1>EWS Admin Login</h1>
+    <div id="notice" class="notice"></div>
+    <form id="loginForm" action="/admin-login" method="POST">
       <label for="username">Username</label>
-      <input id="username" name="username" type="text" autocomplete="username" required />
+      <input type="text" id="username" name="username" required autocomplete="username" value="admin" />
       <label for="password">Password</label>
-      <input id="password" name="password" type="password" autocomplete="current-password" required />
-      <div class="row" style="margin-top:8px"><button class="btn" type="submit">Sign in</button></div>
+      <input type="password" id="password" name="password" required autocomplete="current-password" value="password" />
+      <button type="submit">Login</button>
     </form>
-
-    <div class="password-reset">
-      <a href="#" id="resetPasswordLink">Forgot Password?</a>
-    </div>
-    <div id="resetMessage" class="notice" style="display:none;margin-top:10px;"></div>
-
-    <div class="small" style="margin-top:24px">Default credentials are read from environment variables <code>ADMIN_USERNAME</code> and <code>ADMIN_PASSWORD</code>.</div>
-    <div class="small" style="margin-top:6px">Or <a href="/static/bank_dashboard.html">view dashboard</a> (requires login for admin features).</div>
   </div>
-
   <script>
-    // Show error message if redirected with failed=1
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('failed') === '1') {
-      const n = document.getElementById('notice');
-      n.innerText = 'Login failed — invalid credentials.';
-      n.style.display = 'block';
-    }
-
-    // Password reset functionality
-    document.getElementById('resetPasswordLink').addEventListener('click', function(e) {
-      e.preventDefault();
-      const messageDiv = document.getElementById('resetMessage');
-      messageDiv.style.display = 'block';
-      messageDiv.innerText = 'Password reset instructions would be sent to your registered email address in a production environment.';
-      messageDiv.style.color = '#059669'; // green-600
-      
-      // Hide the message after 5 seconds
-      setTimeout(() => {
-        messageDiv.style.display = 'none';
-      }, 5000);
-    });
-
-    // Submit form via fetch to make redirect behavior explicit and handle cookies/feedback
     document.getElementById('loginForm').addEventListener('submit', async function (e) {
       e.preventDefault();
       const n = document.getElementById('notice');
@@ -88,13 +62,11 @@
           headers: { 'Accept': 'text/html,application/xhtml+xml,application/xml' }
         });
 
-        // If server responds with redirect, follow it explicitly.
         if (res.redirected) {
           window.location.href = res.url;
           return;
         }
 
-        // Some servers return 302 without flagged 'redirected' for fetch; check headers
         const loc = res.headers.get('location');
         if (loc) {
           window.location.href = loc;
@@ -102,17 +74,25 @@
         }
 
         if (res.status === 200) {
-          // Loaded HTML (unlikely for login success) — navigate to dashboard anyway
           window.location.href = '/static/bank_dashboard.html';
           return;
         }
+        
+        // On failure (e.g., 401 response not redirecting)
+        if (res.status === 401) {
+            n.innerText = 'Login failed — Invalid credentials or session expired.';
+            n.classList.add('error');
+            n.style.display = 'block';
+            return;
+        }
 
-        // On failure, show message
         n.innerText = 'Login failed — please try again.';
+        n.classList.add('error');
         n.style.display = 'block';
 
       } catch (err) {
-        n.innerText = 'Network error — check that the server is running.';
+        n.innerText = 'An error occurred during login. Check server connection.';
+        n.classList.add('error');
         n.style.display = 'block';
       }
     });

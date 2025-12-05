@@ -9,7 +9,7 @@
     <style>
         /* Global & Custom Layout Styling (Consistent with Dashboard) */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-        body { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: #f4f7f9; display: flex; min-height: 10vh; margin: 0; }
+        body { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: #f4f7f9; display: flex; min-height: 100vh; margin: 0; }
         .sidebar { width: 250px; background-color: #ffffff; box-shadow: 2px 0 5px rgba(0,0,0,0.05); padding: 20px 0; display: flex; flex-direction: column; flex-shrink: 0; }
         .main-content-wrapper { flex-grow: 1; display: flex; flex-direction: column; }
         .header { background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
@@ -17,7 +17,7 @@
         .logo { font-size: 20px; font-weight: 800; color: #4f46e5; padding: 0 20px 20px; border-bottom: 1px solid #f3f4f6; margin-bottom: 10px; }
         .nav-item { padding: 10px 20px; color: #4b5563; text-decoration: none; display: flex; align-items: center; gap: 10px; font-weight: 500; transition: background-color 0.2s, color 0.2s; cursor: pointer; }
         .nav-item:hover, .nav-item.active { background-color: #eef2ff; color: #4f46e5; border-right: 3px solid #4f46e5; }
-        .card { box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 12px; border: 1px solid #e5e7eb; background: white; }
+        .card { box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 12px; border: 1px solid #e5e7eb; }
     </style>
 </head>
 <body>
@@ -37,153 +37,101 @@
         <header class="header">
             <h1 class="text-2xl font-bold text-gray-800">Model Performance Monitoring</h1>
             <div class="flex items-center space-x-4">
-                <div class="flex items-center space-x-2 text-sm text-gray-600">
-                    <svg class="w-5 h-5 text-indigo-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path></svg>
-                    <span>Welcome, Analyst</span>
-                </div>
                 <button id="logoutBtn" type="button" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition duration-150">Logout</button>
             </div>
         </header>
 
         <main class="content-area">
             <div class="max-w-full">
-                <h1 class="text-3xl font-bold mb-6 text-gray-800">Model Performance Monitoring</h1>
-
+                
                 <section class="mb-8">
-                    <h2 class="text-xl font-semibold mb-3 text-gray-800">Key Performance Indicators (KPIs)</h2>
-                    <div id="kpi-cards" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <h2 class="text-xl font-semibold mb-3 text-gray-800">Key Performance Indicators</h2>
+                    <div id="kpi-cards" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        
                         <div class="card p-4 bg-white shadow-md">
                             <div class="text-sm font-medium text-gray-500">Latest AUC</div>
                             <div id="kpi-auc" class="text-3xl font-bold text-indigo-600 mt-1">—</div>
                             <div class="text-xs text-gray-500 mt-1" id="kpi-auc-time">Last updated: —</div>
                         </div>
+
                         <div class="card p-4 bg-white shadow-md">
                             <div class="text-sm font-medium text-gray-500">Latest F1-Score</div>
                             <div id="kpi-f1" class="text-3xl font-bold text-green-600 mt-1">—</div>
                             <div class="text-xs text-gray-500 mt-1" id="kpi-f1-time">Last updated: —</div>
                         </div>
+
                         <div class="card p-4 bg-white shadow-md">
                             <div class="text-sm font-medium text-gray-500">Latest Accuracy</div>
                             <div id="kpi-accuracy" class="text-3xl font-bold text-yellow-600 mt-1">—</div>
                             <div class="text-xs text-gray-500 mt-1" id="kpi-accuracy-time">Last updated: —</div>
                         </div>
+                        
+                        <div class="card p-4 bg-white shadow-md border-l-4 border-gray-300">
+                            <div class="text-sm font-medium text-gray-500">Latest Evaluation Date</div>
+                            <div id="kpi-eval-date" class="text-xl font-bold text-gray-800 mt-1 pt-1">—</div>
+                            <div class="text-xs text-gray-500 mt-1">Based on newest metric.</div>
+                        </div>
+
+                         <div class="card p-4 bg-white shadow-md border-l-4 border-yellow-400">
+                            <div class="text-sm font-medium text-gray-500">Data Drift Warning</div>
+                            <div id="kpi-drift-status" class="text-xl font-bold text-green-600 mt-1 pt-1">No Drift Detected</div>
+                            <div class="text-xs text-gray-500 mt-1">Placeholder monitor.</div>
+                        </div>
+
                     </div>
                 </section>
 
                 <section class="mb-8">
                     <h2 class="text-xl font-semibold mb-3 text-gray-800">Performance Over Time (Model Drift Detection)</h2>
-                    <div class="card p-6 mb-6">
-                        <h3 class="text-lg font-semibold mb-3">AUC Over Time</h3>
-                        <div style="height: 300px;"><canvas id="aucChart"></canvas></div>
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="card p-6 bg-white"><h3 class="text-lg font-semibold mb-3 text-gray-700">AUC Trend</h3><canvas id="aucChart" height="200"></canvas></div>
+                        <div class="card p-6 bg-white"><h3 class="text-lg font-semibold mb-3 text-gray-700">F1-Score Trend</h3><canvas id="f1Chart" height="200"></canvas></div>
+                        <div class="card p-6 bg-white"><h3 class="text-lg font-semibold mb-3 text-gray-700">Accuracy Trend</h3><canvas id="accuracyChart" height="200"></canvas></div>
                     </div>
-                    <div class="card p-6 mb-6">
-                        <h3 class="text-lg font-semibold mb-3">F1-Score Over Time</h3>
-                        <div style="height: 300px;"><canvas id="f1Chart"></canvas></div>
-                    </div>
-                    <div class="card p-6">
-                        <h3 class="text-lg font-semibold mb-3">Accuracy Over Time</h3>
-                        <div style="height: 300px;"><canvas id="accuracyChart"></canvas></div>
+                </section>
+
+                <section class="mb-8">
+                    <div class="card p-6 bg-white">
+                        <h2 class="text-xl font-semibold mb-4 text-gray-800">Model Management</h2>
+                        <div class="flex justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-100">
+                            <div>
+                                <h3 class="font-semibold text-gray-700">Model Artifact Reload</h3>
+                                <p class="text-sm text-gray-500">Force the API to reload the model, scaler, and encoder files from the disk (e.g., after a new model training pipeline completes).</p>
+                            </div>
+                            <button id="reloadModelBtn" type="button" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition duration-150 flex items-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 12m0 0a8.001 8.001 0 0015.356 2M20 20v-5h-.581"></path></svg>
+                                <span>Reload Model</span>
+                            </button>
+                        </div>
                     </div>
                 </section>
 
             </div>
         </main>
+
     </div>
 
     <script>
-        //--- Navigation Handlers ---
+        // --- Navigation ---
+        document.getElementById('navDashboard').addEventListener('click', () => { window.location.href = 'bank_dashboard.html'; });
+        document.getElementById('navRisk').addEventListener('click', () => { window.location.href = 'risk_management.html'; });
+        document.getElementById('navAdmin').addEventListener('click', () => { window.location.href = 'admin.html'; });
 
+        // --- API & Chart Setup --- 
+        const PERFORMANCE_URL = window.location.origin + '/api/model_performance';
+        const RELOAD_MODEL_URL = window.location.origin + '/api/model/retrain';
 
-        document.getElementById('navDashboard').addEventListener('click', () => { window.location.href = '/static/bank_dashboard.html'; });
-        document.getElementById('navRisk').addEventListener('click', () => { window.location.href = '/static/risk_management.html'; });
-        document.getElementById('navModels').addEventListener('click', () => { window.location.href = '/static/model_performance.html'; });
-        document.getElementById('navAdmin').addEventListener('click', () => { window.location.href = '/static/admin.html'; });
-        
+        let aucChart = null;
+        let f1Chart = null;
+        let accuracyChart = null;
 
-        //--- Logout Handler ---
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            const res = await fetch(window.location.origin + '/admin-logout', { method: 'POST', credentials: 'same-origin' });
-            if (res.redirected) {
-              window.location.href = res.url;
-            } else {
-              window.location.href = '/admin-login.html'; 
-            }
-        });
-
-        //--- Model Performance Logic ---
-        const API_PERF_URL = window.location.origin + '/api/model_performance';
-        
-        let aucChart, f1Chart, accuracyChart;
-
-        function formatTimestamp(timestamp) {
-            if (!timestamp) return '—';
-            //Use local format for user-friendliness
-            return new Date(timestamp).toLocaleString();
-        }
-
-        function createLineChart(ctx, label, data, color) {
-            return new Chart(ctx, {
-                type: 'line',
-                data: {
-                    //Use a custom function to format the timestamp strings for the labels
-
-                    labels: data.map(d => formatTimestamp(d.timestamp)),
-                    datasets: [{
-                        label: label,
-                        data: data.map(d => d.value),
-                        borderColor: color,
-                        backgroundColor: color.replace('1)', '0.1)'), // Lighter fill
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            min: 0,
-                            max: 1.05, 
-                            
-                            //Allow slightly over 1 for better visibility near the max
-
-
-                            title: {
-                                display: true,
-                                text: 'Score'
-                            }
-                        },
-                        x: {
-                             //Use 'category' scale for time-series where labels are already formatted strings
-                             type: 'category',
-                             title: {
-                                display: true,
-                                text: 'Evaluation Time'
-                             }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const rawData = data[context.dataIndex];
-                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(4)} (Test Size: ${rawData.test_size})`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
+        // --- Fetch Performance Data ---
         async function fetchPerformanceData() {
             try {
-                const res = await fetch(API_PERF_URL, { credentials: 'same-origin' });
-                // If the API returns 401 (Unauthorized), redirect to login
-                if (res.status === 401) {
-                    window.location.href = '/admin-login.html';
+                const res = await fetch(PERFORMANCE_URL, { credentials: 'same-origin' });
+
+                if (res.status === 401) { 
+                    window.location.href = '/admin-login';
                     return;
                 }
                 if (!res.ok) {
@@ -193,49 +141,69 @@
                 
                 // --- Update KPI Cards ---
                 const updateKPI = (metric, id) => {
-                    const metricData = data[metric] || [];
-                    // Sort by timestamp to get the latest entry (important since API returns oldest first)
-                    const sortedData = metricData.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-                    const latest = sortedData.length > 0 ? sortedData[sortedData.length - 1] : null;
-
-                    // Use metric_value instead of value since that's what the API returns
-                    document.getElementById(`kpi-${id}`).innerText = latest ? latest.metric_value.toFixed(4) : 'N/A';
-                    document.getElementById(`kpi-${id}-time`).innerText = latest ? `Last updated: ${formatTimestamp(latest.timestamp)}` : 'Last updated: N/A';
+                    const metricData = data[metric];
+                    if (metricData) {
+                        document.getElementById(`kpi-${id}`).innerText = (metricData.latest_value * 100).toFixed(2) + '%';
+                        const date = new Date(metricData.latest_timestamp).toLocaleDateString();
+                        document.getElementById(`kpi-${id}-time`).innerText = `Last updated: ${date}`;
+                        
+                        // Set the overall latest evaluation date
+                        const currentDateEl = document.getElementById('kpi-eval-date');
+                        const currentTimestamp = currentDateEl.dataset.timestamp ? new Date(currentDateEl.dataset.timestamp) : new Date(0);
+                        const newTimestamp = new Date(metricData.latest_timestamp);
+                        
+                        if (newTimestamp > currentTimestamp) {
+                            currentDateEl.innerText = newTimestamp.toLocaleDateString();
+                            currentDateEl.dataset.timestamp = metricData.latest_timestamp;
+                        }
+                    }
                 };
-
+                
                 updateKPI('AUC', 'auc');
                 updateKPI('F1-Score', 'f1');
                 updateKPI('Accuracy', 'accuracy');
 
-                // --- Render Charts ---
-                // Modify the chart rendering to use metric_value instead of value
-                const renderChart = (chartVar, elementId, label, metricData, color) => {
+                // --- Chart Rendering ---
+                const renderChart = (chart, elementId, label, metricData, color) => {
+                    if (chart) chart.destroy();
+                    if (!metricData) return null;
+
+                    const timestamps = metricData.timestamps.map(ts => new Date(ts).toLocaleDateString());
+                    
                     const ctx = document.getElementById(elementId).getContext('2d');
-                    if (chartVar) {
-                        chartVar.destroy(); 
-                    }
-                    if (metricData && metricData.length > 0) {
-                        // Transform the data to match what the chart expects
-                        const chartData = metricData.map(item => ({
-                            timestamp: item.timestamp,
-                            value: item.metric_value,
-                            test_size: item.test_size
-                        }));
-                        // Return the new Chart instance
-                        return createLineChart(ctx, label, chartData, color);
-                    } else {
-                        // Clear canvas and display no data message
-                        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-                        ctx.font = '16px Inter';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillStyle = '#6b7280'; // gray-500
-                        ctx.fillText('No data available for this metric', ctx.canvas.width/2, ctx.canvas.height/2);
-                        return null;
-                    }
+                    return new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: timestamps,
+                            datasets: [{
+                                label: label,
+                                data: metricData.values,
+                                borderColor: color,
+                                backgroundColor: color.replace('1)', '0.1)'), // Lighter fill
+                                borderWidth: 2,
+                                fill: true,
+                                pointRadius: 3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: false,
+                                    max: 1.0,
+                                    min: 0.6,
+                                    title: { display: true, text: 'Score' }
+                                }
+                            }
+                        }
+                    });
                 };
 
-                //Destroy old charts to prevent memory leaks and re-render
+                // Destroy old charts to prevent memory leaks and re-render
+                if (aucChart) aucChart.destroy();
+                if (f1Chart) f1Chart.destroy();
+                if (accuracyChart) accuracyChart.destroy();
 
                 aucChart = renderChart(aucChart, 'aucChart', 'AUC', data['AUC'], 'rgba(79, 70, 229, 1)'); // Indigo
                 f1Chart = renderChart(f1Chart, 'f1Chart', 'F1-Score', data['F1-Score'], 'rgba(5, 150, 105, 1)'); // Green
@@ -243,23 +211,56 @@
                 
             } catch (error) {
                 console.error('Error fetching performance data:', error);
-                document.getElementById('kpi-cards').innerHTML = `<div class="md:col-span-3 p-4 bg-red-100 text-red-800 rounded-lg">Error loading performance data. Check server status or API endpoint.</div>`;
+                document.getElementById('kpi-cards').innerHTML = `<div class="md:col-span-5 p-4 bg-red-100 text-red-800 rounded-lg">Error loading performance data. Check server status or API endpoint.</div>`;
             }
         }
+        
+        // --- Model Reload Button Handler (NEW) ---
+        document.getElementById('reloadModelBtn').addEventListener('click', async function() {
+            if (!confirm("Are you sure you want to reload the model assets? This will interrupt prediction service briefly.")) {
+                return;
+            }
 
-        //Fetch data on load
+            const btn = this;
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<svg class="animate-spin w-4 h-4 mr-2" viewBox="0 0 24 24"></svg> <span>Reloading...</span>';
 
+            try {
+                const res = await fetch(RELOAD_MODEL_URL, { method: 'POST', credentials: 'same-origin' });
+
+                if (res.status === 401) { window.location.href = '/admin-login.html'; return; }
+                
+                const result = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(result.detail || result.message || 'Model reload failed.');
+                }
+
+                alert('Model Reload Successful: ' + result.message);
+                fetchPerformanceData(); // Refresh data in case evaluation metrics were also reloaded
+
+            } catch (error) {
+                alert('Model Reload Failed: ' + error.message);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+
+
+        // --- Initialize ---
         fetchPerformanceData();
-document.getElementById('logoutBtn').addEventListener('click', async () => {
-    // Note: The admin.html file uses 'logout' instead of 'logoutBtn'
-    // If your admin.html uses 'logout', use that ID: document.getElementById('logout').addEventListener(...)
-    const res = await fetch(window.location.origin + '/admin-logout', { method: 'POST', credentials: 'same-origin' });
-    if (res.redirected) {
-      window.location.href = res.url;
-    } else {
-      window.location.href = '/admin-login.html'; 
-    }
-});
+
+        // --- Logout ---
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            const res = await fetch(window.location.origin + '/admin-logout', { method: 'POST', credentials: 'same-origin' });
+            if (res.redirected) {
+                window.location.href = res.url;
+            } else {
+                window.location.href = '/admin-login';
+            }
+        });
     </script>
 </body>
 </html>

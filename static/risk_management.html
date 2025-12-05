@@ -16,13 +16,17 @@
         .logo { font-size: 20px; font-weight: 800; color: #4f46e5; padding: 0 20px 20px; border-bottom: 1px solid #f3f4f6; margin-bottom: 10px; }
         .nav-item { padding: 10px 20px; color: #4b5563; text-decoration: none; display: flex; align-items: center; gap: 10px; font-weight: 500; transition: background-color 0.2s, color 0.2s; cursor: pointer; }
         .nav-item:hover, .nav-item.active { background-color: #eef2ff; color: #4f46e5; border-right: 3px solid #4f46e5; }
-        .card { box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 12px; border: 1px solid #e5e7eb; background: white; padding: 24px; }
-        /* Alert severity indicators */
-        .alert-card { border-left: 4px solid #f59e0b; }
-        .alert-card.critical { border-left-color: #ef4444; }
-        .alert-card.high { border-left-color: #f97316; }
-        .alert-card.medium { border-left-color: #eab308; }
-        .alert-card.low { border-left-color: #22c55e; }
+        .card { box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 12px; border: 1px solid #e5e7eb; }
+        
+        /* Custom Styles */
+        .alert-item { border-left-width: 4px; padding: 16px; margin-bottom: 12px; background-color: white; }
+        .severity-High { border-left-color: #ef4444; } /* Red */
+        .severity-Medium { border-left-color: #f59e0b; } /* Amber/Yellow */
+        .severity-Low { border-left-color: #3b82f6; } /* Blue */
+        
+        /* Modal Backdrop */
+        .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+        .modal-content { background-color: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; position: relative; }
     </style>
 </head>
 <body>
@@ -40,216 +44,205 @@
     <div class="main-content-wrapper">
         
         <header class="header">
-            <h1 class="text-2xl font-bold text-gray-800">Risk Management Dashboard</h1>
+            <h1 class="text-2xl font-bold text-gray-800">Risk Management Portal</h1>
             <div class="flex items-center space-x-4">
-                <div class="flex items-center space-x-2 text-sm text-gray-600">
-                    <svg class="w-5 h-5 text-indigo-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path></svg>
-                    <span>Welcome, Analyst</span>
-                </div>
+                <button id="refreshAlerts" type="button" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition duration-150">Refresh Alerts</button>
                 <button id="logoutBtn" type="button" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition duration-150">Logout</button>
             </div>
         </header>
 
         <main class="content-area">
-            <section class="mb-8">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-semibold text-gray-800">Active Risk Alerts</h2>
-                    <button id="refreshAlerts" class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-lg text-sm font-medium hover:bg-indigo-200 transition duration-150">
-                        Refresh Alerts
-                    </button>
-                </div>
-                <div id="alertsContainer" class="grid grid-cols-1 gap-4">
-                    <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center text-gray-500">
-                        Loading alerts...
+            <div class="max-w-full">
+                
+                <section class="mb-8">
+                    <h2 class="text-xl font-semibold mb-3 text-gray-800">Active High-Risk Alerts (<span id="alertCount">0</span>)</h2>
+                    <p class="text-gray-600 mb-4">Review and manage loan applications flagged for high default risk by the Early Warning System.</p>
+                    <div id="alertsContainer" class="space-y-4">
+                        <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center text-gray-500">
+                            Loading alerts...
+                        </div>
+                    </div>
+                </section>
+
+                <div class="card p-6 bg-white">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Portfolio Heatmap & Scenario Planning</h2>
+                    <p class="text-gray-600 mb-6"> This module provides aggregate risk views, stress testing simulations, and suggested mitigation strategies for high-risk accounts. </p>
+                    <div class="p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800">
+                        <p class="font-medium">Placeholder Content:</p>
+                        <p class="text-sm">Future integration will display interactive charts for Value-at-Risk (VaR) and Expected Shortfall metrics, alongside a list of current high-risk loan segments (e.g., by Region, Credit Type).</p>
                     </div>
                 </div>
-            </section>
 
-            <div class="card">
-                <h2 class="text-xl font-semibold mb-4 text-gray-800">Risk Mitigation Strategies & Portfolio Heatmap</h2>
-                <p class="text-gray-600 mb-6">
-                    This module provides aggregate risk views, stress testing simulations, and suggested mitigation strategies for high-risk accounts.
-                </p>
-                <div class="p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800">
-                    <p class="font-medium">Placeholder Content:</p>
-                    <p class="text-sm">Future integration will display interactive charts for Value-at-Risk (VaR) and Expected Shortfall metrics, alongside a list of current high-risk loan segments.</p>
-                </div>
             </div>
         </main>
+
     </div>
 
-    <div id="alertModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-        <div class="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 class="text-lg font-semibold mb-4">Update Alert Status</h3>
-            <form id="alertActionForm">
-                <input type="hidden" id="alertId" value="">
+    <div id="alertModal" class="modal-backdrop hidden" onclick="if(event.target.id === 'alertModal') document.getElementById('alertModal').classList.add('hidden')">
+        <div class="modal-content">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Alert Resolution: <span id="modalAlertId">#</span></h2>
+            
+            <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+                <div class="bg-gray-50 p-3 rounded-lg"><div class="font-medium text-gray-500">Entity ID</div><div id="modalEntityId" class="font-semibold text-gray-800"></div></div>
+                <div class="bg-gray-50 p-3 rounded-lg"><div class="font-medium text-gray-500">Prediction Score</div><div id="modalScore" class="font-semibold text-gray-800"></div></div>
+                <div class="bg-gray-50 p-3 rounded-lg col-span-2"><div class="font-medium text-gray-500">Risk Signal / Time</div><div id="modalSignalTime" class="font-semibold text-gray-800"></div></div>
+            </div>
+
+            <form id="resolutionForm">
+                <input type="hidden" id="formAlertId" name="alert_id">
                 
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select id="alertStatus" class="w-full p-2 border border-gray-300 rounded-lg">
+                <label class="block mb-4">
+                    <span class="text-sm font-medium text-gray-700">Update Status</span>
+                    <select id="statusSelect" name="status" class="mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm">
                         <option value="New">New</option>
-                        <option value="Under Review">Under Review</option>
-                        <option value="Mitigated">Mitigated</option>
+                        <option value="In Progress">In Progress</option>
                         <option value="Closed">Closed</option>
                     </select>
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Manager Notes</label>
-                    <textarea id="managerNotes" class="w-full p-2 border border-gray-300 rounded-lg" rows="3"></textarea>
-                </div>
+                </label>
                 
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Resolution Action (If Closed/Mitigated)</label>
-                    <textarea id="resolutionAction" class="w-full p-2 border border-gray-300 rounded-lg" rows="3"></textarea>
-                </div>
+                <label class="block mb-4">
+                    <span class="text-sm font-medium text-gray-700">Manager Notes (Internal)</span>
+                    <textarea id="notesTextarea" name="manager_notes" rows="4" class="mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"></textarea>
+                </label>
+
+                <label class="block mb-6">
+                    <span class="text-sm font-medium text-gray-700">Resolution Action Taken (External)</span>
+                    <textarea id="resolutionActionTextarea" name="resolution_action" rows="4" class="mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" placeholder="e.g., Rejected loan, requested additional collateral, approved with special conditions."></textarea>
+                </label>
 
                 <div class="flex justify-end space-x-3">
-                    <button type="button" onclick="document.getElementById('alertModal').classList.add('hidden')" 
-                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-150">
-                        Cancel
-                    </button>
-                    <button type="submit" 
-                            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-150">
-                        Save Changes
-                    </button>
+                    <button type="button" onclick="document.getElementById('alertModal').classList.add('hidden')" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium">Cancel</button>
+                    <button type="submit" id="saveResolutionBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium">Save Resolution</button>
                 </div>
             </form>
         </div>
     </div>
 
+
     <script>
-        const API_BASE = window.location.origin;
+        // --- Navigation ---
+        document.getElementById('navDashboard').addEventListener('click', () => { window.location.href = 'bank_dashboard.html'; });
+        document.getElementById('navModels').addEventListener('click', () => { window.location.href = 'model_performance.html'; });
+        document.getElementById('navAdmin').addEventListener('click', () => { window.location.href = 'admin.html'; });
 
-        // --- Navigation Handlers (Common to all HTML pages) ---
-        document.getElementById('navDashboard').addEventListener('click', () => { window.location.href = '/static/bank_dashboard.html'; });
-        document.getElementById('navRisk').addEventListener('click', () => { window.location.href = '/static/risk_management.html'; });
-        document.getElementById('navModels').addEventListener('click', () => { window.location.href = '/static/model_performance.html'; });
-        document.getElementById('navAdmin').addEventListener('click', () => { window.location.href = '/static/admin.html'; });
-        
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            const res = await fetch(API_BASE + '/admin-logout', { method: 'POST', credentials: 'same-origin' });
-            if (res.redirected) {
-              window.location.href = res.url;
-            } else {
-              // Fallback if the redirect status isn't caught
-              window.location.href = '/admin-login.html'; 
-            }
-        });
+        // --- API URL ---
+        const ALERTS_URL = window.location.origin + '/api/alerts';
+        const UPDATE_ALERT_URL = (id) => `${window.location.origin}/api/alerts/${id}/update_status`;
 
-        // --- Alert Management Logic ---
+        // --- Helper Functions ---
+        const getSeverityClass = (severity) => `severity-${severity.replace(/\s/g, '')}`;
+        const getStatusPill = (status) => {
+            let color = 'bg-gray-200 text-gray-700';
+            if (status === 'New') color = 'bg-red-100 text-red-800';
+            else if (status === 'In Progress') color = 'bg-yellow-100 text-yellow-800';
+            else if (status === 'Closed') color = 'bg-green-100 text-green-800';
+            return `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${color}">${status}</span>`;
+        };
+        const formatProbability = (p) => `${(p * 100).toFixed(2)}%`;
 
-        function getSeverityClass(severity) {
-            switch (severity.toLowerCase()) {
-                case 'high': return 'high';
-                case 'medium': return 'medium';
-                case 'low': return 'low';
-                case 'critical': return 'critical';
-                default: return 'medium'; 
+        // --- Load Alerts ---
+        async function loadAlerts() {
+            const container = document.getElementById('alertsContainer');
+            container.innerHTML = `<div class="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center text-gray-500"> Loading alerts... </div>`;
+            document.getElementById('alertCount').innerText = '0';
+
+            try {
+                const res = await fetch(ALERTS_URL, { credentials: 'same-origin' });
+                if (res.status === 401) { window.location.href = '/admin-login'; return; }
+                if (!res.ok) { throw new Error('Failed to fetch alerts.'); }
+                
+                const alerts = await res.json();
+
+                document.getElementById('alertCount').innerText = alerts.length.toLocaleString();
+
+                if (!alerts || alerts.length === 0) {
+                    container.innerHTML = `<div class="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center text-gray-500"> No active alerts at this time. </div>`;
+                    return;
+                }
+
+                container.innerHTML = alerts.map(alert => {
+                    const severityClass = getSeverityClass(alert.severity);
+                    const timestamp = new Date(alert.alert_timestamp).toLocaleString();
+                    const statusPill = getStatusPill(alert.status);
+                    
+                    return `
+                        <div class="alert-item ${severityClass} card flex justify-between items-center" data-alert='${JSON.stringify(alert)}'>
+                            <div>
+                                <div class="text-lg font-semibold text-gray-900">${alert.risk_signal} (${alert.severity})</div>
+                                <div class="text-sm text-gray-600 mt-1">
+                                    Entity ID: <span class="font-mono text-xs text-indigo-600">${alert.entity_id}</span> | 
+                                    Score: ${formatProbability(alert.prediction_score)} | 
+                                    Time: ${timestamp}
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                ${statusPill}
+                                <button type="button" class="review-btn px-3 py-1 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg text-sm font-medium transition duration-150" data-alert-id="${alert.id}">Review</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Attach event listeners to the new Review buttons
+                document.querySelectorAll('.review-btn').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const alertElement = this.closest('.alert-item');
+                        const alertData = JSON.parse(alertElement.dataset.alert);
+                        openAlertModal(alertData);
+                    });
+                });
+
+            } catch (e) {
+                console.error('Error in loadAlerts:', e);
+                container.innerHTML = `<div class="p-4 bg-red-100 border border-red-400 rounded-lg text-center text-red-700"> Error loading alerts. Please try refreshing. </div>`;
             }
         }
-
+        
+        // --- Modal Control ---
         function openAlertModal(alert) {
-            // Populate modal fields
-            document.getElementById('alertId').value = alert.id;
-            document.getElementById('alertStatus').value = alert.status;
-            document.getElementById('managerNotes').value = alert.manager_notes || '';
-            document.getElementById('resolutionAction').value = alert.resolution_action || '';
-            // Show the modal
+            document.getElementById('modalAlertId').innerText = `#${alert.id}`;
+            document.getElementById('modalEntityId').innerText = alert.entity_id;
+            document.getElementById('modalScore').innerText = formatProbability(alert.prediction_score);
+            document.getElementById('modalSignalTime').innerText = `${alert.risk_signal} | ${new Date(alert.alert_timestamp).toLocaleString()}`;
+
+            // Populate form fields
+            document.getElementById('formAlertId').value = alert.id;
+            document.getElementById('statusSelect').value = alert.status;
+            document.getElementById('notesTextarea').value = alert.manager_notes || '';
+            document.getElementById('resolutionActionTextarea').value = alert.resolution_action || '';
+            
             document.getElementById('alertModal').classList.remove('hidden');
         }
 
-        function renderAlerts(alerts) {
-            const container = document.getElementById('alertsContainer');
-            if (!alerts || alerts.length === 0) {
-                container.innerHTML = `<div class="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center text-gray-500">
-                    No active alerts at this time.
-                </div>`;
-                return;
-            }
-
-            container.innerHTML = alerts.map(alert => {
-                const severityClass = getSeverityClass(alert.severity);
-                const timestamp = new Date(alert.alert_timestamp).toLocaleString();
-                const statusColor = alert.status === 'New' ? 'bg-red-500' : 
-                                    alert.status === 'Under Review' ? 'bg-yellow-500' :
-                                    'bg-gray-500';
-
-                // Use the data-alert attribute to pass the full alert object to the click handler
-                return `
-                    <div class="alert-card ${severityClass} p-4 border border-gray-200 rounded-lg cursor-pointer transition duration-150 hover:shadow-lg" 
-                         data-alert='${JSON.stringify(alert)}' onclick="openAlertModal(JSON.parse(this.dataset.alert))">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-semibold text-gray-800">${alert.risk_signal}</h3>
-                                <p class="text-sm text-gray-600 mt-1">Entity ID: ${alert.entity_id}</p>
-                                <p class="text-sm text-gray-600">Risk Score: ${(alert.prediction_score * 100).toFixed(2)}%</p>
-                                <p class="text-xs text-gray-400 mt-2">Alert Time: ${timestamp}</p>
-                            </div>
-                            <div class="flex flex-col items-end space-y-1">
-                                <span class="text-xs font-bold uppercase py-1 px-2 rounded-full text-white ${statusColor}">
-                                    ${alert.status}
-                                </span>
-                                <span class="text-sm font-semibold text-${severityClass === 'high' ? 'red' : severityClass === 'medium' ? 'yellow' : 'green'}-700 uppercase">
-                                    ${alert.severity} Risk
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        async function loadAlerts() {
-            const container = document.getElementById('alertsContainer');
-            container.innerHTML = `<div class="p-4 bg-gray-50 border border-gray-200 rounded-lg text-center text-gray-500">
-                Loading alerts...
-            </div>`;
-            try {
-                // Fetch alerts (only non-Closed status)
-                const response = await fetch(API_BASE + '/api/alerts', { credentials: 'same-origin' });
-                
-                if (response.status === 401) {
-                    // This is a redundant check, as middleware should redirect, but good practice
-                    window.location.href = '/admin-login.html'; 
-                    return;
-                }
-                if (!response.ok) throw new Error('Failed to fetch alerts');
-                
-                const alerts = await response.json();
-                renderAlerts(alerts);
-            } catch (error) {
-                console.error("Error loading alerts:", error);
-                container.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-lg text-center text-red-700">
-                    Failed to load alerts. Check API connection and authentication.
-                </div>`;
-            }
-        }
-
-        // Event listener for the modal form submission
-        document.getElementById('alertActionForm').addEventListener('submit', async (e) => {
+        // --- Handle Update Alert ---
+        document.getElementById('resolutionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            const alert_id = document.getElementById('formAlertId').value;
+            const status = document.getElementById('statusSelect').value;
+            const manager_notes = document.getElementById('notesTextarea').value;
+            const resolution_action = document.getElementById('resolutionActionTextarea').value;
             
-            const alertId = document.getElementById('alertId').value;
-            const status = document.getElementById('alertStatus').value;
-            const managerNotes = document.getElementById('managerNotes').value;
-            const resolutionAction = document.getElementById('resolutionAction').value;
+            const payload = {
+                status: status,
+                manager_notes: manager_notes,
+                resolution_action: resolution_action
+            };
+
+            const saveBtn = document.getElementById('saveResolutionBtn');
+            saveBtn.disabled = true;
+            const originalText = saveBtn.innerText;
+            saveBtn.innerText = 'Saving...';
             
             try {
-                const response = await fetch(`${API_BASE}/api/alerts/${alertId}/update_status`, {
+                const response = await fetch(UPDATE_ALERT_URL(alert_id), {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        status: status,
-                        manager_notes: managerNotes || null,
-                        resolution_action: resolutionAction || null
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                    credentials: 'same-origin'
                 });
                 
-                if (response.status === 401) {
-                    window.location.href = '/admin-login.html';
+                if (response.status === 401) { 
+                    window.location.href = '/admin-login'; 
                     return;
                 }
                 if (!response.ok) {
@@ -261,27 +254,29 @@
                 document.getElementById('alertModal').classList.add('hidden');
                 loadAlerts();
                 
-                // Show success message
-                alert('Alert updated successfully!');
+                // Show success message (using native alert for simplicity)
+                alert(`Alert #${alert_id} updated successfully!`);
             } catch (error) {
                 alert(`Error updating alert: ${error.message}`);
+            } finally {
+                saveBtn.innerText = originalText;
+                saveBtn.disabled = false;
             }
         });
 
-        // Initialize on page load and attach to refresh button
+        // --- Initialize ---
         document.addEventListener('DOMContentLoaded', loadAlerts);
         document.getElementById('refreshAlerts').addEventListener('click', loadAlerts);
         
+        // --- Logout ---
         document.getElementById('logoutBtn').addEventListener('click', async () => {
-    // Note: The admin.html file uses 'logout' instead of 'logoutBtn'
-    // If your admin.html uses 'logout', use that ID: document.getElementById('logout').addEventListener(...)
-    const res = await fetch(window.location.origin + '/admin-logout', { method: 'POST', credentials: 'same-origin' });
-    if (res.redirected) {
-      window.location.href = res.url;
-    } else {
-      window.location.href = '/admin-login.html'; 
-    }
-});
+            const res = await fetch(window.location.origin + '/admin-logout', { method: 'POST', credentials: 'same-origin' });
+            if (res.redirected) {
+                window.location.href = res.url;
+            } else {
+                window.location.href = '/admin-login'; 
+            }
+        });
     </script>
 </body>
 </html>

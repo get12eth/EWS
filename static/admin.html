@@ -16,170 +16,319 @@
     .header { background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
     .content-area { flex-grow: 1; padding: 30px; }
     .container { max-width: 100%; background-color: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e5e7eb; }
-    
-    /* 3. Sidebar Styling (Consistent with Dashboard) */
+
+    /* 3. Navigation Tabs */
+    .tab-header { border-bottom: 1px solid #e5e7eb; margin-bottom: 20px; display: flex; }
+    .tab-button { padding: 10px 20px; cursor: pointer; border: none; background: transparent; color: #6b7280; font-weight: 500; transition: color 0.2s, border-bottom 0.2s; }
+    .tab-button.active { color: #4f46e5; border-bottom: 2px solid #4f46e5; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* 4. Sidebar Nav (Consistent with Dashboard) */
     .logo { font-size: 20px; font-weight: 800; color: #4f46e5; padding: 0 20px 20px; border-bottom: 1px solid #f3f4f6; margin-bottom: 10px; }
     .nav-item { padding: 10px 20px; color: #4b5563; text-decoration: none; display: flex; align-items: center; gap: 10px; font-weight: 500; transition: background-color 0.2s, color 0.2s; cursor: pointer; }
     .nav-item:hover, .nav-item.active { background-color: #eef2ff; color: #4f46e5; border-right: 3px solid #4f46e5; }
     
-    /* 4. Utility Components */
-    .status-indicator { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
-    .status-dot { width: 10px; height: 10px; border-radius: 50%; background-color: #10b981; /* Green: Operational */ }
-    
-    /* 5. Button Styling */
-    .btn { padding: 10px 16px; border-radius: 6px; background:#4f46e5; color:#fff; border:none; cursor:pointer; font-weight: 600; transition: background-color 0.2s, box-shadow 0.2s; font-size: 14px; }
-    .btn:hover { background: #4338ca; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
-    .btn.secondary { background:#6b7280; }
-    .btn.secondary:hover { background:#4b5563; }
-    .btn.danger { background:#dc2626; }
-    .btn.danger:hover { background:#b91c1c; }
-    
-    /* 6. Content Specifics */
-    h1 { font-size: 24px; margin-bottom: 8px; color: #1f2937; }
-    p { color: #6b7280; margin-bottom: 20px; }
-    .action-group { display:flex; justify-content: flex-start; flex-wrap: wrap; gap:12px; margin-bottom:30px; padding-bottom: 20px; border-bottom: 1px solid #e5e7eb; }
-    #responseArea { margin-top: 20px; padding: 12px; border-radius: 6px; font-size: 14px; font-weight: 500; display: none; }
+    /* 5. Tooltip/Response Message */
+    #responseMessage { transition: opacity 0.3s; }
   </style>
 </head>
 <body>
 
-  <aside class="sidebar">
-      <div class="logo">EWS Portal</div>
-      <nav>
-          <div class="nav-item" id="navDashboard">📊 Dashboard</div>
-          <div class="nav-item" id="navRisk">📈 Risk Management</div>
-          <div class="nav-item" id="navModels">🧠 Model Performance</div>
-          <div class="nav-item active" id="navAdmin">⚙️ Admin Portal</div>
-      </nav>
-  </aside>
+    <aside class="sidebar">
+        <div class="logo">EWS Portal</div>
+        <nav>
+            <div class="nav-item" id="navDashboard">📊 Dashboard</div>
+            <div class="nav-item" id="navRisk">📈 Risk Management</div>
+            <div class="nav-item" id="navModels">🧠 Model Performance</div>
+            <div class="nav-item active" id="navAdmin">⚙️ Admin Portal</div>
+        </nav>
+    </aside>
 
-  <div class="main-content-wrapper">
+    <div class="main-content-wrapper">
+        <header class="header">
+            <h1 class="text-2xl font-bold text-gray-800">System Administration</h1>
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2 text-sm text-gray-600">
+                    <div class="status-dot w-3 h-3 rounded-full bg-green-500"></div><span>System Operational</span>
+                </div>
+                <button id="logout" type="button" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition duration-150">Logout</button>
+            </div>
+        </header>
 
-    <header class="header">
-      <h1 class="text-2xl font-bold text-gray-800">System Administration</h1>
-      <div class="flex items-center space-x-4">
-        <div class="flex items-center space-x-2 text-sm text-gray-600">
-            <div class="status-dot"></div><span>System Operational</span>
-        </div>
-        <button id="logout" type="button" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition duration-150">Logout</button>
-      </div>
-    </header>
+        <main class="content-area">
+            <div class="container">
+                
+                <div class="tab-header" id="tabHeaders">
+                    <button class="tab-button active" data-tab="history">History Management</button>
+                    <button class="tab-button" data-tab="macro">Macro Indicators</button>
+                    <button class="tab-button" data-tab="audit">Activity Log (NEW)</button>
+                </div>
 
-    <main class="content-area">
-      <div class="container">
-        
-        <h2 style="font-size: 20px; margin-bottom: 20px; color: #374151;">⚙️ Model & Data Management</h2> 
-        
-        <p>Control the lifecycle of the prediction model and manage training data.</p>
-        <div class="action-group">
-          <button class="btn" id="loadModel">🧠 Load Model (If Unloaded)</button>
-          <button class="btn secondary" id="retrainModel">🔁 Retrain Model (Requires Data)</button>
-          <button class="btn danger" id="unloadModel">❌ Unload Model</button>
-        </div>
+                <div id="responseMessage" class="hidden px-4 py-2 text-sm rounded-lg mb-4"></div>
 
-        <h2 style="font-size: 20px; margin-bottom: 20px; color: #374151;">📊 History & Data Export Management</h2> 
-        <p>Manage prediction history archives and system data exports.</p>
-        <div class="action-group">
-          <button class="btn" id="exportCsv">⬇️ Export All History (CSV)</button>
-          <button class="btn secondary" id="exportCsvRecent">⬇️ Export Recent 100 (CSV)</button>
-          <button class="btn danger" id="clearHistory">🗑️ Clear All History</button>
-        </div>
+                <div id="history" class="tab-content active">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">Prediction History Management</h2>
+                    <p class="text-gray-600 mb-6">Manage the stored history of all prediction requests and results.</p>
 
-        <div id="responseArea" style="min-height: 40px;"></div>
-      </div>
-    </main>
-  </div>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <div class="flex-grow">
+                                <h3 class="font-semibold text-gray-700">Export Recent History</h3>
+                                <p class="text-sm text-gray-500">Download the last 100 prediction records as a CSV file.</p>
+                            </div>
+                            <button id="exportRecent" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition duration-150">Export Last 100</button>
+                        </div>
+                        <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <div class="flex-grow">
+                                <h3 class="font-semibold text-gray-700">Export All History</h3>
+                                <p class="text-sm text-gray-500">Download all stored prediction records as a CSV file.</p>
+                            </div>
+                            <button id="exportAll" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition duration-150">Export All</button>
+                        </div>
+                        <div class="flex items-center space-x-4 p-4 bg-red-50 rounded-lg border border-red-200">
+                            <div class="flex-grow">
+                                <h3 class="font-semibold text-red-700">Clear All History</h3>
+                                <p class="text-sm text-red-500">Permanently delete ALL prediction records from the database. **Caution: This action is irreversible.**</p>
+                            </div>
+                            <button id="clearHistory" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition duration-150">Clear All</button>
+                        </div>
+                    </div>
+                </div>
 
-<script>
-    const responseArea = document.getElementById('responseArea');
-    const BASE_URL = window.location.origin;
+                <div id="macro" class="tab-content">
+                     <h2 class="text-xl font-semibold mb-4 text-gray-800">Macro-Economic Indicator Update (NEW)</h2>
+                     <p class="text-gray-600 mb-6">Manually inject the latest macro-economic data for model monitoring and systemic risk tracking.</p>
 
-    // --- Utility Functions ---
-    async function showResponse(message, isError = false) {
-      responseArea.innerText = message;
-      responseArea.style.backgroundColor = isError ? '#fee2e2' : '#d1fae5'; /* Light red/green background */
-      responseArea.style.color = isError ? '#991b1b' : '#065f46'; /* Dark red/green text */
-      responseArea.style.display = 'block';
-      setTimeout(() => { responseArea.style.display = 'none'; }, 8000);
-    }
-    
+                     <form id="macroUpdateForm" class="grid grid-cols-2 gap-4">
+                        <label class="block col-span-1"><span class="text-sm font-medium text-gray-700">GDP Growth Rate (%)</span><input type="number" step="0.01" name="gdp_growth_rate" class="mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="1.5"></label>
+                        <label class="block col-span-1"><span class="text-sm font-medium text-gray-700">Market Index YoY (%)</span><input type="number" step="0.01" name="market_index_yoy" class="mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="8.0"></label>
+                        <label class="block col-span-1"><span class="text-sm font-medium text-gray-700">Unemployment Rate (%)</span><input type="number" step="0.01" name="unemployment_rate" class="mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="4.0"></label>
+                        <label class="block col-span-1"><span class="text-sm font-medium text-gray-700">Inflation Rate (%)</span><input type="number" step="0.01" name="inflation_rate" class="mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="2.0"></label>
+                        <label class="block col-span-1"><span class="text-sm font-medium text-gray-700">Interest Rate (%)</span><input type="number" step="0.01" name="interest_rate" class="mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="0.5"></label>
+                        
+                        <div class="col-span-2 mt-4">
+                            <button type="submit" id="updateMacroBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition duration-150">Update Indicators</button>
+                        </div>
+                    </form>
+                </div>
 
+                <div id="audit" class="tab-content">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-800">System Activity Log (Audit)</h2>
+                    <p class="text-gray-600 mb-6">View the last 100 administrative actions, including logins, logouts, and key data modifications.</p>
 
-    //--- Navigation Handlers ---
-    
-    document.getElementById('navDashboard').addEventListener('click', () => { window.location.href = '/static/bank_dashboard.html'; });
-    document.getElementById('navRisk').addEventListener('click', () => { window.location.href = '/static/risk_management.html'; });
-    document.getElementById('navModels').addEventListener('click', () => { window.location.href = '/static/model_performance.html'; });
-    document.getElementById('navAdmin').addEventListener('click', () => { window.location.href = '/static/admin.html'; });
-    
+                    <div class="overflow-x-auto card p-4">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action Type</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditLogTable" class="bg-white divide-y divide-gray-200">
+                                <tr><td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">Loading activity log...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
 
+    </div>
 
-    //--- Admin Action Logic ---
+    <script>
+        const BASE_URL = window.location.origin;
 
-    async function postAction(endpoint, successMessage, errorMessage) {
-        showResponse('Processing...', false);
-        try {
-            const res = await fetch(BASE_URL + endpoint, { method: 'POST', credentials: 'same-origin' });
-            if (!res.ok) {
-                const err = await res.json().catch(() => ({detail: 'Server error'}));
-                return showResponse(errorMessage + ': ' + (err.detail || 'Unknown error'), true);
-            }
-            const data = await res.json();
-            showResponse(data.message || successMessage, false);
-        } catch (e) {
-            showResponse('Network error: ' + e.message, true);
+        // --- Navigation ---
+        document.getElementById('navDashboard').addEventListener('click', () => { window.location.href = 'bank_dashboard.html'; });
+        document.getElementById('navRisk').addEventListener('click', () => { window.location.href = 'risk_management.html'; });
+        document.getElementById('navModels').addEventListener('click', () => { window.location.href = 'model_performance.html'; });
+
+        // --- Utility Functions ---
+        function showResponse(message, isError) {
+            const el = document.getElementById('responseMessage');
+            el.innerText = message;
+            el.classList.remove('hidden', 'bg-red-100', 'text-red-800', 'bg-green-100', 'text-green-800');
+            el.classList.add(isError ? 'bg-red-100' : 'bg-green-100', isError ? 'text-red-800' : 'text-green-800');
+            el.style.opacity = 1;
+
+            setTimeout(() => {
+                el.style.opacity = 0;
+                setTimeout(() => el.classList.add('hidden'), 300);
+            }, 5000);
         }
-    }
 
-    
-    document.getElementById('loadModel').addEventListener('click', () => postAction('/load_model', 'Model loaded successfully!', 'Failed to load model'));
-    document.getElementById('retrainModel').addEventListener('click', () => postAction('/retrain_model', 'Model retraining initiated!', 'Failed to initiate retraining'));
-    document.getElementById('unloadModel').addEventListener('click', () => postAction('/unload_model', 'Model unloaded successfully!', 'Failed to unload model'));
+        async function postAction(url, successMsg, errorMsg) {
+            try {
+                const res = await fetch(BASE_URL + url, { method: 'POST', credentials: 'same-origin' });
+                if (res.status === 401) { window.location.href = '/admin-login'; return; }
+                if (!res.ok) { 
+                    const err = await res.json().catch(()=>({detail: errorMsg}));
+                    throw new Error(err.detail || errorMsg);
+                }
+                showResponse(successMsg, false);
+            } catch (error) {
+                showResponse(error.message || errorMsg, true);
+            }
+        }
 
-    // --- Export Logic ---
-    document.getElementById('exportCsv').addEventListener('click', async () => {
-      showResponse('Exporting all history...', false);
-      const res = await fetch(BASE_URL + '/export_history_csv', { credentials: 'same-origin' });
-      if (!res.ok) return showResponse('Export failed: ' + res.status, true);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'predictions_history_all.csv'; a.click();
-      URL.revokeObjectURL(url);
-      showResponse('All history exported!', false);
-    });
-    
-    document.getElementById('exportCsvRecent').addEventListener('click', async () => {
-      showResponse('Exporting recent history...', false);
-      const res = await fetch(BASE_URL + '/export_history_csv?limit=100', { credentials: 'same-origin' });
-      if (!res.ok) return showResponse('Export failed: ' + res.status, true);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'predictions_history_recent_100.csv'; a.click();
-      URL.revokeObjectURL(url);
-      showResponse('Recent history exported!', false);
-    });
-    
-    
-    document.getElementById('clearHistory').addEventListener('click', async () => {
-      if (!confirm("Are you sure you want to permanently delete ALL prediction history? This action cannot be undone.")) 
-      {
-          return;
-      }
-      postAction('/clear_history', 'Prediction history cleared!', 'Clear history failed');
-    });
+        // --- Tab Control ---
+        document.getElementById('tabHeaders').addEventListener('click', (e) => {
+            if (e.target.classList.contains('tab-button')) {
+                const tabName = e.target.dataset.tab;
 
-   document.getElementById('logout').addEventListener('click', async () => {
-    // Note: The admin.html file uses 'logout' instead of 'logoutBtn'
-    // If your admin.html uses 'logout', use that ID: document.getElementById('logout').addEventListener(...)
-    const res = await fetch(window.location.origin + '/admin-logout', { method: 'POST', credentials: 'same-origin' });
-    if (res.redirected) {
-      window.location.href = res.url;
-    } else {
-      window.location.href = '/admin-login.html'; 
-    }
-});
-  </script>
+                // Deactivate all buttons and contents
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+                // Activate clicked button and corresponding content
+                e.target.classList.add('active');
+                document.getElementById(tabName).classList.add('active');
+                
+                // Special case for Audit log: reload on click
+                if (tabName === 'audit') {
+                    fetchAuditLog();
+                }
+            }
+        });
+
+
+        // --- History Management Logic ---
+        document.getElementById('exportAll').addEventListener('click', async () => {
+            showResponse('Exporting all history...', false);
+            const res = await fetch(BASE_URL + '/export_history_csv', { credentials: 'same-origin' });
+            if (res.status === 401) { window.location.href = '/admin-login'; return; }
+            if (!res.ok) return showResponse('Export failed: ' + res.status, true);
+            
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'predictions_history_all.csv'; a.click();
+            URL.revokeObjectURL(url);
+            showResponse('All history exported!', false);
+        });
+
+        document.getElementById('exportRecent').addEventListener('click', async () => {
+            showResponse('Exporting recent history...', false);
+            const res = await fetch(BASE_URL + '/export_history_csv?limit=100', { credentials: 'same-origin' });
+            if (res.status === 401) { window.location.href = '/admin-login'; return; }
+            if (!res.ok) return showResponse('Export failed: ' + res.status, true);
+            
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'predictions_history_recent_100.csv'; a.click();
+            URL.revokeObjectURL(url);
+            showResponse('Recent history exported!', false);
+        });
+        
+        document.getElementById('clearHistory').addEventListener('click', async () => {
+            if (!confirm("Are you sure you want to permanently delete ALL prediction history? This action cannot be undone.")) {
+                return;
+            }
+            postAction('/clear_history', 'Prediction history cleared!', 'Clear history failed');
+        });
+
+        // --- Macro Indicator Update Logic (NEW) ---
+        document.getElementById('macroUpdateForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const updateBtn = document.getElementById('updateMacroBtn');
+            updateBtn.disabled = true;
+            const originalText = updateBtn.innerText;
+            updateBtn.innerText = 'Updating...';
+
+            const data = Object.fromEntries(new FormData(this).entries());
+            
+            // Convert to floats
+            Object.keys(data).forEach(key => {
+                data[key] = parseFloat(data[key]);
+            });
+
+            try {
+                const res = await fetch(BASE_URL + '/api/macro_indicators/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                    credentials: 'same-origin'
+                });
+
+                if (res.status === 401) { window.location.href = '/admin-login'; return; }
+                
+                const result = await res.json();
+                if (!res.ok) {
+                    throw new Error(result.detail || result.message || 'Macro indicator update failed.');
+                }
+                showResponse('Macro Indicators updated successfully!', false);
+
+            } catch (error) {
+                showResponse('Macro Indicator Update Failed: ' + error.message, true);
+            } finally {
+                updateBtn.innerText = originalText;
+                updateBtn.disabled = false;
+            }
+        });
+
+        // --- Audit Log Logic (NEW) ---
+        async function fetchAuditLog() {
+            const tableBody = document.getElementById('auditLogTable');
+            tableBody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">Loading activity log...</td></tr>';
+            
+            try {
+                const res = await fetch(BASE_URL + '/api/audit_log', { credentials: 'same-origin' });
+                
+                if (res.status === 401) { window.location.href = '/admin-login'; return; }
+                if (!res.ok) throw new Error('Failed to fetch audit log');
+                
+                const logs = await res.json();
+                tableBody.innerHTML = '';
+
+                if (logs.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-sm text-gray-500 text-center">No activity recorded.</td></tr>';
+                    return;
+                }
+
+                logs.forEach(log => {
+                    const time = new Date(log.timestamp).toLocaleString();
+                    const details = log.details ? JSON.stringify(log.details, null, 2) : 'N/A';
+                    
+                    let actionClass = 'text-gray-900';
+                    if (log.action_type.includes('FAILURE')) actionClass = 'text-red-600 font-medium';
+                    else if (log.action_type.includes('SUCCESS')) actionClass = 'text-green-600 font-medium';
+                    else if (log.action_type.includes('UPDATE')) actionClass = 'text-indigo-600 font-medium';
+
+                    const row = `
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${time}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${log.user}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm ${actionClass}">${log.action_type}</td>
+                            <td class="px-6 py-4 text-xs font-mono text-gray-600 max-w-xs overflow-x-auto">${details}</td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+
+            } catch (error) {
+                console.error('Audit Log Error:', error);
+                tableBody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-sm text-red-500 text-center">Failed to load activity log.</td></tr>';
+            }
+        }
+
+
+        // --- Logout ---
+       document.getElementById('logout').addEventListener('click', async () => {
+            const res = await fetch(window.location.origin + '/admin-logout', { method: 'POST', credentials: 'same-origin' });
+
+
+
+            
+            if (res.redirected) {
+                window.location.href = res.url;
+            } else {
+                window.location.href = '/admin-login'; 
+            }
+        });
+    </script>
 </body>
 </html>
