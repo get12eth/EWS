@@ -132,3 +132,36 @@ This document summarizes the implementation of the Early Warning System (EWS) en
 4. Implement email/SMS notifications for critical alerts
 5. Add historical trend analysis for alerts
 6. Add more alert types based on different risk thresholds
+
+---
+
+## Migration tool & CI
+
+- **scripts/migrate_sqlite_to_mysql.py**: Improved to detect the target primary key name, preserve source IDs when requested (`--preserve-ids`), and filter inserted columns to only those present in the target table to avoid schema mismatch errors.
+- **tests/test_migration_verification.py**: New integration test which compares rows and overlapping columns between the SQLite source and a `DATABASE_URL` target; the test is skipped unless `DATABASE_URL` is set.
+- **.github/workflows/migration-integration.yml**: New GitHub Actions workflow that spins up a MySQL service, mirrors the `Loan_table` schema into the service, runs the migration (`--commit --preserve-ids`), and runs the verification test.
+
+How to run locally
+
+1. Dry-run to review planned inserts:
+   ```bash
+   $env:DATABASE_URL = "mysql+pymysql://root:Bant%406963@127.0.0.1:3306/lon-default"
+   python scripts/migrate_sqlite_to_mysql.py --dry-run
+   ```
+
+2. Commit (preserve source IDs):
+   ```bash
+   $env:DATABASE_URL = "mysql+pymysql://root:Bant%406963@127.0.0.1:3306/lon-default"
+   python scripts/migrate_sqlite_to_mysql.py --commit --preserve-ids
+   ```
+
+3. Run verification test:
+   ```bash
+   $env:DATABASE_URL = "mysql+pymysql://root:Bant%406963@127.0.0.1:3306/lon-default"
+   .\.venv\Scripts\pytest -q tests/test_migration_verification.py::test_migration_verification
+   ```
+
+Notes:
+- Always run `--dry-run` first.
+- The script will skip conflicting IDs when `--preserve-ids` is used. Inspect the skipped count.
+- CI will run the same sequence on PRs to the default branch.

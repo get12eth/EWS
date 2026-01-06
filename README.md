@@ -104,6 +104,21 @@ The systems provide alerts to risk managers, enabling them to act quickly for hi
    python init_db.py
    ```
 
+   If you prefer to use an existing MySQL database instead of the default SQLite file, set the `DATABASE_URL` environment variable before starting the app. Example using PyMySQL driver (note URL-encoding special characters in your password):
+
+   ```bash
+   # Example (replace host, user, password and database name):
+   export DATABASE_URL="mysql+pymysql://root:Bant%406963@localhost/lon-default"   # macOS/Linux
+   # On Windows PowerShell:
+   $env:DATABASE_URL = "mysql+pymysql://root:Bant%406963@localhost/lon-default"
+   ```
+
+   Make sure you installed the extra requirement `pymysql` (it's in `requirements.txt`). Then run the DB initialization if needed:
+
+   ```
+   python init_db.py
+   ```
+
 3. Start the application:
    ```
    uvicorn main:app --reload
@@ -115,6 +130,43 @@ Run the test suite:
 ```
 python test_ews.py
 ```
+
+Migration verification test
+
+A small integration test verifies the migration from the local SQLite `Loan_table` into a MySQL target set by `DATABASE_URL`.
+
+- The test is `tests/test_migration_verification.py` and is skipped unless `DATABASE_URL` is set.
+- To run locally (PowerShell):
+  ```powershell
+  $env:DATABASE_URL = "mysql+pymysql://root:Bant%406963@127.0.0.1:3306/lon-default"
+  .\.venv\Scripts\pytest -q tests/test_migration_verification.py::test_migration_verification
+  ```
+
+Migration script notes
+
+The migration helper `scripts/migrate_sqlite_to_mysql.py` now:
+
+- Detects the target primary key name (handles `id`, `ID`, etc.)
+- Preserves source IDs when `--preserve-ids` is used (skips conflicting IDs)
+- Filters out columns not present on the target before inserting to avoid schema mismatch errors
+
+Usage examples (PowerShell):
+
+- Dry-run:
+  ```powershell
+  $env:DATABASE_URL = "mysql+pymysql://root:Bant%406963@127.0.0.1:3306/lon-default"
+  python scripts/migrate_sqlite_to_mysql.py --dry-run
+  ```
+
+- Commit (preserve IDs):
+  ```powershell
+  $env:DATABASE_URL = "mysql+pymysql://root:Bant%406963@127.0.0.1:3306/lon-default"
+  python scripts/migrate_sqlite_to_mysql.py --commit --preserve-ids
+  ```
+
+CI
+
+A GitHub Actions workflow `.github/workflows/migration-integration.yml` runs this migration and test on PRs and pushes to the default branch. It mirrors the source schema into a MySQL service and runs the migration to ensure the code remains compatible with schema changes.
 
 ## Usage
 

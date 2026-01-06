@@ -1,0 +1,71 @@
+name: Migration verification
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+jobs:
+  migration-integration:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: Bant@6963
+          MYSQL_DATABASE: lon-default
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      DATABASE_URL: mysql+pymysql://root:Bant%406963@127.0.0.1:3306/lon-default
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pymysql pytest
+
+      - name: Wait for MySQL
+        run: |
+          for i in {1..30}; do
+            mysqladmin ping -h 127.0.0.1 -P 3306 --silent && break
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
+
+      - name: Mirror source schema into target
+        run: |
+          python - <<'PY'
+          from sqlalchemy import create_engine, MetaData, Table, Column
+          import os
+          src = create_engine('sqlite:///data/predictions.db')
+          tgt = create_engine(os.environ['DATABASE_URL'])
+          meta_src = MetaData()
+          t_src = Table('Loan_table', meta_src, autoload_with=src)
+          # Build a compatible table on target using same column names and types
+          cols = [Column(c.name, c.type, primary_key=c.primary_key) for c in t_src.columns]
+          meta_tgt = MetaData()
+          Table('Loan_table', meta_tgt, *cols)
+          meta_tgt.create_all(tgt)
+          print('Mirrored Loan_table schema to target')
+          PY
+
+      - name: Run migration (commit)
+        run: |
+          python scripts/migrate_sqlite_to_mysql.py --commit --preserve-ids
+
+      - name: Run verification test
+        run: |
+          pytest -q tests/test_migration_verification.py::test_migration_verification -q

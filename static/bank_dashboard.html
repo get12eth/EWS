@@ -183,6 +183,7 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
+                                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Probability</th>
@@ -191,7 +192,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="historyTable" class="bg-white divide-y divide-gray-200">
-                                    <tr><td colspan="5" class="px-6 py-4 text-sm text-gray-500 text-center">Loading prediction history...</td></tr>
+                                    <tr><td colspan="6" class="px-6 py-4 text-sm text-gray-500 text-center">Loading prediction history...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -349,17 +350,33 @@
             try {
                 const res = await fetch(HISTORY_URL, { credentials: 'same-origin' });
                 if (res.status === 401) { window.location.href = '/admin-login'; return; }
-                const history = await res.json();
-                
-                const tableBody = document.getElementById('historyTable');
-                tableBody.innerHTML = '';
 
-                if (history.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-sm text-gray-500 text-center">No predictions yet.</td></tr>';
+                if (!res.ok) {
+                    const txt = await res.text().catch(() => res.statusText || 'Unknown error');
+                    document.getElementById('historyTable').innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-sm text-red-500 text-center">Failed to load history: ${res.status} ${txt}</td></tr>`;
                     return;
                 }
 
-                history.forEach(item => {
+                let history;
+                try {
+                    history = await res.json();
+                } catch (err) {
+                    document.getElementById('historyTable').innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-sm text-red-500 text-center">Failed to parse history response.</td></tr>`;
+                    return;
+                }
+
+                const tableBody = document.getElementById('historyTable');
+                tableBody.innerHTML = '';
+
+                const recent = history.slice(0, 5);
+
+                if (recent.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-sm text-gray-500 text-center">No predictions yet.</td></tr>';
+                    return;
+                }
+
+                recent.forEach((item, idx) => {
+                    const index = idx + 1;
                     const statusText = item.prediction_status === 1 ? 'Default' : 'Non-default';
                     const statusColor = item.prediction_status === 1 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
                     const topDriver = Object.entries(item.feature_contributions || {})
@@ -372,6 +389,7 @@
                     
                     const row = `
                         <tr>
+                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">${index}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(item.timestamp).toLocaleTimeString()}</td>
                             <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}">${statusText}</span></td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${formatProbability(item.default_probability)}</td>
@@ -383,7 +401,7 @@
                 });
             } catch (error) {
                 console.error('Error fetching history:', error);
-                document.getElementById('historyTable').innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-sm text-red-500 text-center">Failed to load history.</td></tr>';
+                document.getElementById('historyTable').innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-sm text-red-500 text-center">Failed to load history: ${error.message}</td></tr>`;
             }
         }
         
