@@ -139,7 +139,7 @@ This document summarizes the implementation of the Early Warning System (EWS) en
 
 - **scripts/migrate_sqlite_to_mysql.py**: Improved to detect the target primary key name, preserve source IDs when requested (`--preserve-ids`), and filter inserted columns to only those present in the target table to avoid schema mismatch errors.
 - **tests/test_migration_verification.py**: New integration test which compares rows and overlapping columns between the SQLite source and a `DATABASE_URL` target; the test is skipped unless `DATABASE_URL` is set.
-- **.github/workflows/migration-integration.yml**: New GitHub Actions workflow that spins up a MySQL service, mirrors the `Loan_table` schema into the service, runs the migration (`--commit --preserve-ids`), and runs the verification test.
+- **.github/workflows/migration-integration.yml**: New GitHub Actions workflow that spins up a MySQL service, mirrors the `Loan_table` schema into the service, runs the migration (`--commit --preserve-ids`), and runs the verification test. The workflow now runs on a matrix of MySQL versions (8.0 and 8.1) to validate compatibility across versions.
 
 How to run locally
 

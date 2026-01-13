@@ -1,5 +1,7 @@
 # Early Warning System (EWS) Enhancements
 
+[![migration CI](https://github.com/<OWNER>/<REPO>/actions/workflows/migration-integration.yml/badge.svg)](https://github.com/<OWNER>/<REPO>/actions/workflows/migration-integration.yml)
+
 This project enhances the existing Bank Early Warning System with advanced monitoring and alerting capabilities based on the principles of continuous monitoring, data analysis, risk identification, automated alerts, and intervention/correction.
 
 ## New Features

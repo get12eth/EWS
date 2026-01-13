@@ -8,9 +8,12 @@ on:
 jobs:
   migration-integration:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mysql_image: [mysql:8.0, mysql:8.1]
     services:
       mysql:
-        image: mysql:8.0
+        image: ${{ matrix.mysql_image }}
         env:
           MYSQL_ROOT_PASSWORD: Bant@6963
           MYSQL_DATABASE: lon-default
