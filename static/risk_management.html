@@ -118,7 +118,6 @@
         </div>
     </div>
 
-
     <script>
         // --- Navigation ---
         document.getElementById('navDashboard').addEventListener('click', () => { window.location.href = 'bank_dashboard.html'; });
@@ -198,7 +197,7 @@
             }
         }
         
-        // --- Modal Control ---
+        //--- Modal Control ---
         function openAlertModal(alert) {
             document.getElementById('modalAlertId').innerText = `#${alert.id}`;
             document.getElementById('modalEntityId').innerText = alert.entity_id;
@@ -214,7 +213,8 @@
             document.getElementById('alertModal').classList.remove('hidden');
         }
 
-        // --- Handle Update Alert ---
+
+        //--- Handle Update Alert ---
         document.getElementById('resolutionForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             const alert_id = document.getElementById('formAlertId').value;

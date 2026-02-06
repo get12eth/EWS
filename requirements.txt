@@ -9,7 +9,11 @@ shap
 reportlab
 sqlalchemy
 psycopg2-binary
+pymysql
 matplotlib
 Pillow
 redis
 passlib[bcrypt]
+requests
+pytest
+python-dotenv

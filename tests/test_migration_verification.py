@@ -7,7 +7,7 @@ available.
 
 Run locally (PowerShell):
   $env:DATABASE_URL = "mysql+pymysql://root:pass@127.0.0.1:3306/lon-default"
-  .venv\Scripts\pytest -q tests/test_migration_verification.py::test_migration_verification
+  .venv/Scripts/pytest -q tests/test_migration_verification.py::test_migration_verification
 
 """
 from __future__ import annotations
@@ -15,6 +15,7 @@ from __future__ import annotations
 import os
 import math
 import pytest
+from decimal import Decimal
 from sqlalchemy import create_engine, MetaData, Table, select
 
 
@@ -72,7 +73,9 @@ def test_migration_verification():
             if sv is None and tv is None:
                 continue
             try:
-                if isinstance(sv, (int, float)) and isinstance(tv, (int, float)):
+                # Treat Decimal as numeric for tolerant comparisons
+                numeric_types = (int, float, Decimal)
+                if isinstance(sv, numeric_types) and isinstance(tv, numeric_types):
                     if not math.isclose(float(sv), float(tv), rel_tol=1e-9, abs_tol=1e-9):
                         diffs.append((k, sv, tv))
                 else:

@@ -78,7 +78,7 @@
           return;
         }
         
-        // On failure (e.g., 401 response not redirecting)
+        //On failure (e.g., 401 response not redirecting)
         if (res.status === 401) {
             n.innerText = 'Login failed — Invalid credentials or session expired.';
             n.classList.add('error');

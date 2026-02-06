@@ -8,11 +8,11 @@ if not os.path.exists(db_path):
 else:
     print("Database file exists")
     
-    # Connect to the database
+    #Connect to the database
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
-    # List all tables
+    #List all tables
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
     tables = cursor.fetchall()
     print("Tables in the database:")

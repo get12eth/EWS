@@ -15,9 +15,6 @@ BASE_URL = "http://localhost:8000"
 session = requests.Session()
 
 
-
-
-
 def login():
     """Login to the system to get authentication cookies."""
     # Default credentials from the app
@@ -37,9 +34,6 @@ def login():
     except Exception as e:
         print(f"Login error: {e}")
         return False
-
-
-
 
 
 def test_macro_indicators():
@@ -67,7 +61,6 @@ def test_macro_indicators():
         print(f"Response: {response.json()}")
 
 
-
 def test_alerts():
     """Test alerts functionality."""
     print("\nTesting alerts...")
@@ -82,9 +75,6 @@ def test_alerts():
             print(f"  - ID: {alert['id']}, Signal: {alert['risk_signal']}, Severity: {alert['severity']}, Score: {alert['prediction_score']}")
     else:
         print(f"Failed to get alerts: {response.status_code}")
-
-
-
 
 
 def test_create_test_alert():
@@ -136,10 +126,6 @@ def test_create_test_alert():
         test_alerts()
 
 
-
-
-
-
 def test_alert_update():
     """Test updating an alert."""
     print("\nTesting alert update...")
@@ -184,8 +170,8 @@ def test_alert_update():
                 "status": "New"
             }
             
-            # Since we can't directly create alerts via API, we'll make a high-risk prediction
-            # that should trigger an alert
+            #Since we can't directly create alerts via API, we'll make a high-risk prediction
+            #that should trigger an alert
             high_risk_loan = {
                 "loan_limit": "cf",
                 "Gender": "Male",

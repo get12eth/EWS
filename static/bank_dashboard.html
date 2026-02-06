@@ -1,37 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Bank Early Warning System — Dashboard</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        
-        <style>
-                /* Global & Custom Layout Styling */
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-                body { font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: #f4f7f9; display: flex; min-height: 100vh; margin: 0; }
-                
-                /* Layout Structure */
-                .sidebar { width: 250px; background-color: #ffffff; box-shadow: 2px 0 5px rgba(0,0,0,0.05); padding: 20px 0; display: flex; flex-direction: column; flex-shrink: 0; }
-                .main-content-wrapper { flex-grow: 1; display: flex; flex-direction: column; }
-                .header { background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
-                .content-area { flex-grow: 1; padding: 30px; max-width: 100%; }
-                
-                /* Sidebar Components */
-                .logo { font-size: 20px; font-weight: 800; color: #4f46e5; padding: 0 20px 20px; border-bottom: 1px solid #f3f4f6; margin-bottom: 10px; }
-                .nav-item { padding: 10px 20px; color: #4b5563; text-decoration: none; display: flex; align-items: center; gap: 10px; font-weight: 500; transition: background-color 0.2s, color 0.2s; cursor: pointer; }
-                .nav-item:hover, .nav-item.active { background-color: #eef2ff; color: #4f46e5; border-right: 3px solid #4f46e5; }
-                
-                /* Card Overrides (Existing) */
-                .card { box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-radius: 12px; border: 1px solid #e5e7eb; }
-                .stat-card { border-radius: 12px; padding: 16px; background-color: white; border: 1px solid #f3f4f6; }
-                .input-field { transition: border-color 0.2s; }
-                .input-field:focus { border-color: #4f46e5; box-shadow: 0 0 0 1px #4f46e5; }
-                .cont-positive { color: #dc2626; } /* Red (Increased Risk) */
-                .cont-negative { color: #059669; } /* Green (Reduced Risk) */
-        </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bank Early Warning System — Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Global & Custom Layout Styling */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+        body {
+            font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: #f4f7f9;
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        /* Layout Structure */
+        .sidebar {
+            width: 250px;
+            background-color: #ffffff;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .main-content-wrapper {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .content-area {
+            flex-grow: 1;
+            padding: 30px;
+            max-width: 100%;
+        }
+
+        /* Sidebar Components */
+        .logo {
+            font-size: 20px;
+            font-weight: 800;
+            color: #4f46e5;
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #f3f4f6;
+            margin-bottom: 10px;
+        }
+
+        .nav-item {
+            padding: 10px 20px;
+            color: #4b5563;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            transition: background-color 0.2s, color 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background-color: #eef2ff;
+            color: #4f46e5;
+            border-right: 3px solid #4f46e5;
+        }
+
+        /* Card Overrides (Existing) */
+        .card {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stat-card {
+            border-radius: 12px;
+            padding: 16px;
+            background-color: white;
+            border: 1px solid #f3f4f6;
+        }
+
+        .input-field {
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 1px #4f46e5;
+        }
+
+        .cont-positive {
+            color: #dc2626;
+        }
+
+        /* Red (Increased Risk) */
+        .cont-negative {
+            color: #059669;
+        }
+
+        /* Green (Reduced Risk) */
+    </style>
 </head>
+
 <body>
 
     <aside class="sidebar">
@@ -45,21 +130,31 @@
     </aside>
 
     <div class="main-content-wrapper">
-        
+
         <header class="header">
             <h1 class="text-2xl font-bold text-gray-800">Early Warning System Dashboard</h1>
             <div class="flex items-center space-x-4">
                 <div class="flex items-center space-x-2 text-sm text-gray-600">
-                    <svg class="w-5 h-5 text-indigo-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path></svg>
+                    <svg class="w-5 h-5 text-indigo-500" fill="currentColor" viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z">
+                        </path>
+                    </svg>
                     <span>Welcome, Analyst</span>
                 </div>
-                <button id="logoutBtn" type="button" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition duration-150">Logout</button>
+                <!-- Add Customer Button (placed before logout as requested) -->
+                <button id="addCustomerBtn" type="button"
+                    class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition duration-150">Add
+                    Customer</button>
+                <button id="logoutBtn" type="button"
+                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition duration-150">Logout</button>
             </div>
         </header>
 
         <main class="content-area">
             <div class="max-w-full">
-                
+
                 <section class="mb-8">
                     <h2 class="text-xl font-semibold mb-3 text-gray-800">System Overview</h2>
                     <div id="statsSection" class="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -87,117 +182,82 @@
                 </section>
 
                 <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                    
-                    <div class="lg:col-span-2 card p-6 bg-white">
-                        <h2 class="text-xl font-semibold mb-4 text-gray-800">Loan Risk Prediction</h2>
-                        <form id="predictionForm" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Loan Limit</span><select name="loan_limit" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="nlt">Not Limit</option><option value="cf">CF</option></select></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Gender</span><select name="Gender" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="Male">Male</option><option value="Female">Female</option><option value="Joint">Joint</option></select></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Approval in Advance</span><select name="approv_in_adv" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="nopre">No Pre-Approval</option><option value="pre">Pre-Approval</option></select></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Loan Type</span><select name="loan_type" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="type1">Type 1</option><option value="type2">Type 2</option><option value="type3">Type 3</option></select></label>
 
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Loan Purpose</span><select name="loan_purpose" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="p1">Purchase</option><option value="p2">Refinance</option><option value="p3">Cash Out</option></select></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Credit Worthiness</span><select name="Credit_Worthiness" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="good">Good</option><option value="bad">Bad</option></select></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Open Credit</span><select name="open_credit" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="nopc">No Open Credit</option><option value="pco">PCO</option></select></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Business or Purpose</span><select name="business_or_purpose" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="bp1">BP1</option><option value="bp2">BP2</option><option value="bp3">BP3</option></select></label>
+                    <!-- Loan Risk Prediction form removed by request -->
 
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Negative Ammortization</span><select name="Neg_ammortization" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="not_neg">No</option><option value="neg_amm">Yes</option></select></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Interest Only</span><select name="interest_only" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="not_int">No</option><option value="int_only">Yes</option></select></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Lump Sum Payment</span><select name="lump_sum_payment" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="not_lpsm">No</option><option value="lpsm">Yes</option></select></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Occupancy Type</span><select name="Occupancy_Type" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="pr">Primary</option><option value="ir">Investment</option></select></label>
-
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Secured By</span><select name="Secured_by" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="home">Home</option><option value="land">Land</option></select></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Total Units</span><select name="total_units" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="1U">1 Unit</option><option value="2U">2 Units</option><option value="3U">3 Units</option><option value="4U">4 Units</option></select></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Credit Type</span><select name="credit_type" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="CIB">CIB</option><option value="EXP">EXP</option></select></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Co-Applicant Credit Type</span><select name="co_applicant_credit_type" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="CIB">CIB</option><option value="EXP">EXP</option><option value="NA">NA</option></select></label>
-
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Age</span><select name="age" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="25-34">25-34</option><option value="35-44">35-44</option><option value="45-54">45-54</option><option value="55-64">55-64</option><option value="65-74">65-74</option><option value="<25"><25</option><option value=">74">>74</option></select></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Submission Method</span><select name="submission_of_application" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="to_inst">To Institution</option><option value="not_inst">Not Institution</option></select></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Region</span><select name="Region" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="North">North</option><option value="South">South</option><option value="East">East</option><option value="West">West</option></select></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Security Type</span><select name="Security_Type" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm"><option value="direct">Direct</option><option value="indirect">Indirect</option></select></label>
-
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Rate of Interest (%)</span><input type="number" step="0.01" name="rate_of_interest" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="4.5" required></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Interest Rate Spread</span><input type="number" step="0.01" name="Interest_rate_spread" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="0.5" required></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Upfront Charges ($)</span><input type="number" step="0.01" name="Upfront_charges" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="1500.0" required></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Term (months)</span><input type="number" step="1.0" name="term" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="360.0" required></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Income ($/mo)</span><input type="number" step="0.01" name="income" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="7000.0" required></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">Credit Score</span><input type="number" step="1.0" name="Credit_Score" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="750.0" required></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">LTV (%)</span><input type="number" step="0.01" name="LTV" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="80.0" required></label>
-                            <label class="block"><span class="text-xs font-medium text-gray-500">DTIR1 (%)</span><input type="number" step="0.01" name="dtir1" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="40.0" required></label>
-                            
-                            <div class="col-span-1 sm:col-span-2 flex justify-between space-x-3 mt-4">
-                                <button id="submitBtn" type="submit" class="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold transition duration-150 flex items-center justify-center space-x-2">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m4 0a2 2 0 002 2h2a2 2 0 002-2m0 0V9a1 1 0 00-1-1H7a1 1 0 00-1 1v10m9 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                                    <span>Run Risk Prediction</span>
-                                </button>
-                                <button id="explainBtn" type="button" class="px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-sm font-semibold transition duration-150">
-                                    Feature Explainer
-                                </button>
-                                <button id="exportReportBtn" type="button" class="px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold transition duration-150">
-                                    Export Report (PDF)
-                                </button>
-                                <button id="resetBtn" type="button" class="px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-semibold transition duration-150">
-                                    Reset
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="lg:col-span-1 card p-6 bg-white">
-                        <h2 class="text-xl font-semibold mb-4 text-gray-800">Prediction Result</h2>
-                        <div id="resultOutput">
-                            <div class="flex items-center space-x-2 mb-4">
-                                <div id="resultStatus" class="px-3 py-1 text-xs font-semibold rounded-full bg-gray-200 text-gray-700">Awaiting Prediction</div>
-                                <div id="resultProbability" class="text-2xl font-bold text-gray-800">—</div>
-                            </div>
-                            <div class="mb-4">
-                                <canvas id="probChart" height="150"></canvas>
-                            </div>
-                            <div class="mt-6">
-                                <h3 class="text-md font-semibold mb-2 text-gray-700">Top Feature Contributions (SHAP)</h3>
-                                <div id="contributionsList" class="space-y-1">
-                                    <div class="text-sm text-gray-500">Run a prediction to see feature impact.</div>
-                                </div>
-                            </div>
-                            <div id="alertMessage" class="hidden mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm font-medium">
-                                <strong>⚠️ High Risk Alert!</strong> This loan exceeds the risk threshold.
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Prediction result panel removed -->
                 </section>
 
                 <section class="mb-8">
                     <div class="card p-6 bg-white">
-                        <h2 class="text-xl font-semibold mb-4 text-gray-800">Macro-Economic Indicators Trend (Last 12 Months)</h2>
+                        <h2 class="text-xl font-semibold mb-4 text-gray-800">Macro-Economic Indicators Trend (Last 12
+                            Months)</h2>
                         <div class="p-4 bg-gray-50 rounded-lg">
                             <canvas id="macroTrendChart" height="100"></canvas>
                         </div>
-                        <p class="text-xs text-gray-500 mt-2">Monitors key indicators like GDP Growth, Market Index YoY, and Unemployment Rate for systemic risk assessment.</p>
+                        <p class="text-xs text-gray-500 mt-2">Monitors key indicators like GDP Growth, Market Index YoY,
+                            and Unemployment Rate for systemic risk assessment.</p>
                     </div>
                 </section>
 
+                <!-- Customers List (New) -->
                 <section class="mb-8">
                     <div class="card p-6 bg-white">
-                        <h2 class="text-xl font-semibold mb-4 text-gray-800">Recent Predictions History</h2>
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-xl font-semibold text-gray-800">Customers</h2>
+                            <div class="flex items-center space-x-2">
+                                <input id="customerSearch" type="text" placeholder="Search by ID"
+                                    class="p-2 border border-gray-300 rounded-lg text-sm" />
+                                <button id="customerSearchBtn"
+                                    class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm">Search</button>
+                                <button id="customerClearSearchBtn"
+                                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm">Clear</button>
+                            </div>
+                        </div>
+
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Probability</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Top Driver</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Alert</th>
+                                        <th
+                                            class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            ID</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Loan Purpose</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Credit Score</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Income</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Region</th>
+                                        <th
+                                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody id="historyTable" class="bg-white divide-y divide-gray-200">
-                                    <tr><td colspan="6" class="px-6 py-4 text-sm text-gray-500 text-center">Loading prediction history...</td></tr>
+                                <tbody id="customersTable" class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-4 text-sm text-gray-500 text-center">Loading
+                                            customers...</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
+                        <div class="mt-4 flex items-center justify-between">
+                            <div id="customersPager" class="text-sm text-gray-600">Page 1</div>
+                            <div>
+                                <button id="customersPrev" class="px-3 py-1 bg-gray-100 rounded-lg mr-2">Prev</button>
+                                <button id="customersNext" class="px-3 py-1 bg-gray-100 rounded-lg">Next</button>
+                            </div>
+                        </div>
                     </div>
                 </section>
+
+                <!-- Recent prediction history removed -->
 
             </div>
         </main>
@@ -220,36 +280,14 @@
             }
         });
 
-        // --- API & Chart Setup --- 
-        const API_URL = window.location.origin + '/predict';
-        const HISTORY_URL = window.location.origin + '/predictions';
+        // --- API & Chart Setup (predictions disabled) --- 
+        // Prediction endpoints removed from frontend
         const STATS_URL = window.location.origin + '/stats';
         const MACRO_URL = window.location.origin + '/api/macro_indicators';
 
-        // Chart.js donut for probability
-        const ctx = document.getElementById('probChart').getContext('2d');
-        let probChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Default', 'Non-default'],
-                datasets: [{
-                    data: [0.5, 0.5],
-                    backgroundColor: ['#f87171', '#34d399'],
-                    hoverBackgroundColor: ['#ef4444', '#10b981'],
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                cutout: '70%',
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: true }
-                }
-            }
-        });
-        
-        // Chart.js for Macro Indicators Trend (NEW)
+        // Probability chart removed (predictions disabled)
+
+        //Chart.js for Macro Indicators Trend (NEW)
         const macroCtx = document.getElementById('macroTrendChart').getContext('2d');
         let macroTrendChart = new Chart(macroCtx, {
             type: 'line',
@@ -271,8 +309,7 @@
             }
         });
 
-
-        // --- Helper Functions ---
+        //--- Helper Functions ---
         const formatProbability = (p) => `${(p * 100).toFixed(2)}%`;
         const formatUptime = (seconds) => {
             const minutes = Math.floor(seconds / 60);
@@ -282,7 +319,7 @@
             if (!contributions || Object.keys(contributions).length === 0) {
                 return '<div class="text-sm text-gray-500">No feature contributions available.</div>';
             }
-            // Sort by absolute value
+            //Sort by absolute value
             const sorted = Object.entries(contributions)
                 .map(([k, v]) => ({ k, v }))
                 .sort((a, b) => Math.abs(b.v) - Math.abs(a.v))
@@ -299,7 +336,7 @@
             }).join('');
         }
 
-        // --- Fetch Data Functions ---
+        //--- Fetch Data Functions ---
         async function fetchStats() {
             try {
                 const res = await fetch(STATS_URL, { credentials: 'same-origin' });
@@ -310,7 +347,7 @@
                 document.getElementById('statRate').innerText = formatProbability(stats.default_rate);
                 document.getElementById('statUptime').innerText = formatUptime(stats.uptime_seconds);
                 document.getElementById('statHighAlerts').innerText = stats.high_risk_alerts.toLocaleString(); // NEW STAT
-                
+
                 const modelStatusEl = document.getElementById('statModel');
                 modelStatusEl.innerText = stats.model_status;
                 if (stats.model_status === 'Ready') {
@@ -322,7 +359,7 @@
                 console.error('Error fetching stats:', error);
             }
         }
-        
+
         async function fetchMacroIndicators() {
             try {
                 const res = await fetch(MACRO_URL); // Public API (no credentials)
@@ -344,209 +381,606 @@
                 // Optionally show an error message in the chart area
             }
         }
+        //fetchHistory removed (prediction history disabled)
 
 
-        async function fetchHistory() {
+        //--- Event Listeners ---
+        // Prediction form handlers removed
+
+        // --- Customers JS ---
+        let customersPage = 1;
+        const CUSTOMERS_PER_PAGE = 10;
+
+        async function fetchCustomers(page = 1, searchId = null) {
+            const url = new URL(window.location.origin + '/api/customers');
+            url.searchParams.set('per_page', CUSTOMERS_PER_PAGE);
+            url.searchParams.set('page', page);
+            if (searchId) url.searchParams.set('search_id', searchId);
+
             try {
-                const res = await fetch(HISTORY_URL, { credentials: 'same-origin' });
+                const res = await fetch(url.toString(), { credentials: 'same-origin' });
                 if (res.status === 401) { window.location.href = '/admin-login'; return; }
-
-                if (!res.ok) {
-                    const txt = await res.text().catch(() => res.statusText || 'Unknown error');
-                    document.getElementById('historyTable').innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-sm text-red-500 text-center">Failed to load history: ${res.status} ${txt}</td></tr>`;
-                    return;
-                }
-
-                let history;
-                try {
-                    history = await res.json();
-                } catch (err) {
-                    document.getElementById('historyTable').innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-sm text-red-500 text-center">Failed to parse history response.</td></tr>`;
-                    return;
-                }
-
-                const tableBody = document.getElementById('historyTable');
-                tableBody.innerHTML = '';
-
-                const recent = history.slice(0, 5);
-
-                if (recent.length === 0) {
-                    tableBody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-sm text-gray-500 text-center">No predictions yet.</td></tr>';
-                    return;
-                }
-
-                recent.forEach((item, idx) => {
-                    const index = idx + 1;
-                    const statusText = item.prediction_status === 1 ? 'Default' : 'Non-default';
-                    const statusColor = item.prediction_status === 1 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
-                    const topDriver = Object.entries(item.feature_contributions || {})
-                        .map(([k, v]) => ({ k, v }))
-                        .sort((a, b) => Math.abs(b.v) - Math.abs(a.v))[0];
-                    
-                    const driverText = topDriver ? `${topDriver.k} (${topDriver.v > 0 ? '↑' : '↓'})` : 'N/A';
-                    
-                    const alertText = item.alerts && item.alerts.length > 0 ? `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-500 text-white">ALERT</span>` : '-';
-                    
-                    const row = `
-                        <tr>
-                            <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">${index}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${new Date(item.timestamp).toLocaleTimeString()}</td>
-                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}">${statusText}</span></td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${formatProbability(item.default_probability)}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${driverText}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${alertText}</td>
-                        </tr>
-                    `;
-                    tableBody.innerHTML += row;
-                });
+                if (!res.ok) throw new Error('Failed to fetch customers');
+                const data = await res.json();
+                renderCustomers(data.customers || [], data.page, data.per_page, data.total);
             } catch (error) {
-                console.error('Error fetching history:', error);
-                document.getElementById('historyTable').innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-sm text-red-500 text-center">Failed to load history: ${error.message}</td></tr>`;
+                console.error('Error fetching customers:', error);
+                document.getElementById('customersTable').innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-sm text-red-500 text-center">Failed to load customers.</td></tr>';
             }
         }
-        
-        // --- Event Listeners ---
-        const form = document.getElementById('predictionForm');
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const submitBtn = document.getElementById('submitBtn');
-            const loadingIndicator = document.getElementById('loadingIndicator');
 
-            submitBtn.disabled = true;
-            submitBtn.querySelector('span').innerText = 'Calculating...';
-            // Simple loading state
-            const initialText = submitBtn.querySelector('span').innerText;
-            const initialIcon = submitBtn.querySelector('svg').outerHTML;
-            submitBtn.innerHTML = '<svg class="animate-spin w-5 h-5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="31.4" stroke-dashoffset="15.7"></circle></svg> <span>Calculating...</span>';
+        function renderCustomers(list, page, per_page, total) {
+            const t = document.getElementById('customersTable');
+            t.innerHTML = '';
+            if (!list || list.length === 0) {
+                t.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-sm text-gray-500 text-center">No customers found.</td></tr>';
+                document.getElementById('customersPager').innerText = `Page ${page}`;
+                return;
+            }
 
-
-            const data = Object.fromEntries(new FormData(form).entries());
-            
-            // Convert numerical inputs to float/int
-            ['rate_of_interest', 'Interest_rate_spread', 'Upfront_charges', 'term', 'income', 'Credit_Score', 'LTV', 'dtir1'].forEach(key => {
-                data[key] = parseFloat(data[key]);
+            list.forEach(c => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">${c.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${c.loan_purpose}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${c.Credit_Score}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${c.income}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${c.Region}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button class="px-3 py-1 bg-yellow-500 text-white rounded text-xs mr-2" data-action="update" data-id="${c.id}">Update</button>
+                        <button class="px-3 py-1 bg-indigo-600 text-white rounded text-xs mr-2" data-action="predict" data-id="${c.id}">Predict</button>
+                        <button class="px-3 py-1 bg-red-600 text-white rounded text-xs" data-action="delete" data-id="${c.id}">Delete</button>
+                    </td>
+                `;
+                t.appendChild(row);
             });
 
+            document.getElementById('customersPager').innerText = `Page ${page} — Showing ${list.length} of ${total || 'unknown'}`;
+        }
+
+        //Handlers
+        document.getElementById('customerSearchBtn').addEventListener('click', () => {
+            const v = document.getElementById('customerSearch').value.trim();
+            if (!v) {
+                fetchCustomers(1);
+                return;
+            }
+            fetchCustomers(1, v);
+        });
+        document.getElementById('customerClearSearchBtn').addEventListener('click', () => { document.getElementById('customerSearch').value = ''; fetchCustomers(1); });
+        document.getElementById('customersPrev').addEventListener('click', () => { if (customersPage > 1) { customersPage--; fetchCustomers(customersPage); } });
+        document.getElementById('customersNext').addEventListener('click', () => { customersPage++; fetchCustomers(customersPage); });
+
+        document.getElementById('customersTable').addEventListener('click', async (e) => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            const action = btn.dataset.action;
+            const id = btn.dataset.id;
+            if (action === 'delete') {
+                if (!confirm('Delete customer ' + id + '? This action cannot be undone.')) return;
+                const res = await fetch(window.location.origin + '/api/customers/' + id, { method: 'DELETE', credentials: 'same-origin' });
+                if (!res.ok) return alert('Delete failed: ' + (await res.text()).slice(0, 200));
+                alert('Customer deleted');
+                fetchCustomers(customersPage);
+            } else if (action === 'predict') {
+                try {
+                    runPredictionFor(id);
+                } catch (err) {
+                    alert('Failed to run prediction: ' + (err.message || err));
+                }
+            } else if (action === 'update') {
+                try {
+                    await openCustomerModal('update', id);
+                } catch (err) {
+                    alert('Failed to open update form: ' + (err.message || err));
+                }
+
+            }
+
+        });
+
+        document.getElementById('addCustomerBtn').addEventListener('click', async () => { await openCustomerModal('add'); });
+
+        // --- Customer Modal (Multi-step wizard) ---
+        const customerModalHtml = `
+            <div id="customerModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+                <div id="customerModalOverlay" class="absolute inset-0 bg-black opacity-40 z-40"></div>
+                <div class="bg-white rounded-lg relative z-50 max-w-3xl w-full p-6 max-h-[90vh] overflow-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 id="customerModalTitle" class="text-lg font-semibold">Add Customer</h3>
+                        <div class="flex items-center gap-2">
+                            <button id="customerModalClose" class="px-3 py-1 text-sm rounded bg-gray-100">Close</button>
+                        </div>
+                    </div>
+
+                    <div id="wizardSteps" class="mb-4 text-sm text-gray-600">Step <span id="wizardStepIndex">1</span> of 3</div>
+
+                    <form id="customerForm" class="">
+
+                        <!-- Step 1: Categorical Fields -->
+                        <div class="wizard-step" data-step="1">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Loan Limit</span><select name="loan_limit" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required autofocus><option value="nlt">Not Limit</option><option value="cf">CF</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="loan_limit"></div></label>
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Gender</span><select name="Gender" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="Male">Male</option><option value="Female">Female</option><option value="Joint">Joint</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="Gender"></div></label>
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Approval in Advance</span><select name="approv_in_adv" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="nopre">No Pre-Approval</option><option value="pre">Pre-Approval</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="approv_in_adv"></div></label>
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Loan Type</span><select name="loan_type" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="type1">Type 1</option><option value="type2">Type 2</option><option value="type3">Type 3</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="loan_type"></div></label>
+
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Loan Purpose</span><select name="loan_purpose" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="p1">Purchase</option><option value="p2">Refinance</option><option value="p3">Cash Out</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="loan_purpose"></div></label>
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Credit Worthiness</span><select name="Credit_Worthiness" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="good">Good</option><option value="bad">Bad</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="Credit_Worthiness"></div></label>
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Open Credit</span><select name="open_credit" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="nopc">No Open Credit</option><option value="pco">PCO</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="open_credit"></div></label>
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Business or Purpose</span><select name="business_or_purpose" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="bp1">BP1</option><option value="bp2">BP2</option><option value="bp3">BP3</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="business_or_purpose"></div></label>
+
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Negative Ammortization</span><select name="Neg_ammortization" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="not_neg">No</option><option value="neg_amm">Yes</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="Neg_ammortization"></div></label>
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Interest Only</span><select name="interest_only" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="not_int">No</option><option value="int_only">Yes</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="interest_only"></div></label>
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Lump Sum Payment</span><select name="lump_sum_payment" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="not_lpsm">No</option><option value="lpsm">Yes</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="lump_sum_payment"></div></label>
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Occupancy Type</span><select name="Occupancy_Type" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="pr">Primary</option><option value="ir">Investment</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="Occupancy_Type"></div></label>
+
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Secured By</span><select name="Secured_by" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="home">Home</option><option value="land">Land</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="Secured_by"></div></label>
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Total Units</span><select name="total_units" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="1U">1 Unit</option><option value="2U">2 Units</option><option value="3U">3 Units</option><option value="4U">4 Units</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="total_units"></div></label>
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Credit Type</span><select name="credit_type" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="CIB">CIB</option><option value="EXP">EXP</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="credit_type"></div></label>
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Co-Applicant Credit Type</span><select name="co_applicant_credit_type" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="CIB">CIB</option><option value="EXP">EXP</option><option value="NA">NA</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="co_applicant_credit_type"></div></label>
+
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Age</span><select name="age" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="25-34">25-34</option><option value="35-44">35-44</option><option value="45-54">45-54</option><option value="55-64">55-64</option><option value="65-74">65-74</option><option value="&lt;25">&lt;25</option><option value=">74">&gt;74</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="age"></div></label>
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Submission Method</span><select name="submission_of_application" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="to_inst">To Institution</option><option value="not_inst">Not Institution</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="submission_of_application"></div></label>
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Region</span><select name="Region" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="North">North</option><option value="South">South</option><option value="East">East</option><option value="West">West</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="Region"></div></label>
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Security Type</span><select name="Security_Type" class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" required><option value="direct">Direct</option><option value="indirect">Indirect</option></select><div class="text-red-500 text-xs mt-1 field-error" data-field="Security_Type"></div></label>
+
+                                <div class="md:col-span-2 text-xs text-gray-500 mt-2">(All categorical fields required)</div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Numeric Fields (all required) -->
+                        <div class="wizard-step hidden" data-step="2">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Rate of Interest (%)</span>
+                                    <input type="number" step="0.01" name="rate_of_interest" required class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="4.5">
+                                    <div class="text-red-500 text-xs mt-1 field-error" data-field="rate_of_interest"></div>
+                                </label>
+
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Interest Rate Spread</span>
+                                    <input type="number" step="0.01" name="Interest_rate_spread" required class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="0.5">
+                                    <div class="text-red-500 text-xs mt-1 field-error" data-field="Interest_rate_spread"></div>
+                                </label>
+
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Upfront Charges</span>
+                                    <input type="number" step="0.01" name="Upfront_charges" required class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="1500.0">
+                                    <div class="text-red-500 text-xs mt-1 field-error" data-field="Upfront_charges"></div>
+                                </label>
+
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Term (months)</span>
+                                    <input type="number" step="1" name="term" required class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="360">
+                                    <div class="text-red-500 text-xs mt-1 field-error" data-field="term"></div>
+                                </label>
+
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Income ($/mo)</span>
+                                    <input type="number" step="0.01" name="income" required class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="7000.0">
+                                    <div class="text-red-500 text-xs mt-1 field-error" data-field="income"></div>
+                                </label>
+
+                                <label class="block"><span class="text-xs font-medium text-gray-500">Credit Score</span>
+                                    <input type="number" step="1.0" name="Credit_Score" required class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="750">
+                                    <div class="text-red-500 text-xs mt-1 field-error" data-field="Credit_Score"></div>
+                                </label>
+
+                                <label class="block"><span class="text-xs font-medium text-gray-500">LTV (%)</span>
+                                    <input type="number" step="0.01" name="LTV" required class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="80.0">
+                                    <div class="text-red-500 text-xs mt-1 field-error" data-field="LTV"></div>
+                                </label>
+
+                                <label class="block"><span class="text-xs font-medium text-gray-500">DTI (%)</span>
+                                    <input type="number" step="0.01" name="dtir1" required class="input-field mt-1 w-full p-2 border border-gray-300 rounded-lg text-sm" value="40.0">
+                                    <div class="text-red-500 text-xs mt-1 field-error" data-field="dtir1"></div>
+                                </label>
+
+                                <div class="md:col-span-2 text-xs text-gray-500 mt-2">(All numeric fields required)</div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Review & Submit -->
+                        <div class="wizard-step hidden" data-step="3">
+                            <div class="mb-4">
+                                <h4 class="text-sm font-semibold">Review</h4>
+                                <div id="reviewBlock" class="text-sm text-gray-700 mt-2"></div>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="customer_id" id="customer_id_field" value="">
+
+                        <div class="mt-4 flex justify-between">
+                            <div>
+                                <button type="button" id="wizardBack" class="px-4 py-2 bg-gray-100 rounded">Back</button>
+                                <button type="button" id="wizardNext" class="px-4 py-2 bg-indigo-600 text-white rounded ml-2">Next</button>
+                            </div>
+                            <div>
+                                <button type="button" id="customerFormCancel" class="px-4 py-2 bg-gray-100 rounded">Cancel</button>
+                                <button type="submit" id="customerFormSubmit" class="px-4 py-2 bg-green-600 text-white rounded hidden">Save</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Toast container for inline notifications -->
+            <div id="toastContainer" class="fixed bottom-6 right-6 space-y-2 z-60"></div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', customerModalHtml);
+
+        // --- Predict Modal ---
+        const predictModalHtml = `
+            <div id="predictModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+                <div id="predictModalOverlay" class="absolute inset-0 bg-black opacity-40 z-40"></div>
+                <div class="bg-white rounded-lg relative z-50 max-w-2xl w-full p-6 max-h-[80vh] overflow-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 id="predictModalTitle" class="text-lg font-semibold">Prediction</h3>
+                        <div class="flex items-center gap-2">
+                            <button id="predictModalClose" class="px-3 py-1 text-sm rounded bg-gray-100">Close</button>
+                        </div>
+                    </div>
+                    <div id="predictModalBody" class="text-sm text-gray-700">
+                        <div id="predictLoading" class="text-sm text-gray-500">Loading prediction...</div>
+                        <div id="predictResult" class="hidden">
+                            <div class="mb-3"><strong>Default Probability:</strong> <span id="predictProbability" class="font-semibold"></span></div>
+                            <div class="mb-3"><strong>Alert:</strong> <span id="predictAlert" class="text-sm text-red-600 font-medium"></span></div>
+                            <div class="mb-3"><strong>Top Contributions</strong>
+                                <div id="predictContribs" class="mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', predictModalHtml);
+
+        const predictModal = document.getElementById('predictModal');
+        const predictModalClose = document.getElementById('predictModalClose');
+        const predictModalOverlay = document.getElementById('predictModalOverlay');
+        const predictModalTitle = document.getElementById('predictModalTitle');
+        const predictLoading = document.getElementById('predictLoading');
+        const predictResult = document.getElementById('predictResult');
+        const predictProbability = document.getElementById('predictProbability');
+        const predictAlert = document.getElementById('predictAlert');
+        const predictContribs = document.getElementById('predictContribs');
+
+        function openPredictModal(id) {
+            predictModalTitle.innerText = `Prediction for ${id}`;
+            predictLoading.classList.remove('hidden');
+            predictResult.classList.add('hidden');
+            predictAlert.innerText = '';
+            predictContribs.innerHTML = '';
+            predictModal.classList.remove('hidden');
+        }
+        function closePredictModal() {
+            predictModal.classList.add('hidden');
+        }
+        predictModalClose.addEventListener('click', closePredictModal);
+        if (predictModalOverlay) predictModalOverlay.addEventListener('click', closePredictModal);
+
+        async function runPredictionFor(id) {
             try {
-                const res = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                    credentials: 'same-origin'
-                });
-
-                if (res.status === 401) { window.location.href = '/admin-login'; return; }
-
+                openPredictModal(id);
+                const res = await fetch(window.location.origin + '/api/customers/' + id + '/predict', { method: 'POST', credentials: 'same-origin' });
+                if (res.status === 401) { closePredictModal(); window.location.href = '/admin-login'; return; }
                 if (!res.ok) {
-                    const err = await res.json().catch(()=>({detail:'Prediction failed'}));
-                    throw new Error(err.detail || 'Prediction failed');
+                    const txt = await res.text().catch(() => res.statusText);
+                    closePredictModal(); showToast('Prediction failed: ' + txt, 'error');
+                    return;
                 }
-
-                const result = await res.json();
-
-                const probability = result.default_probability;
-                const nonDefaultProb = 1 - probability;
-                const predictionStatus = result.prediction_status;
-                const isHighRisk = result.alert !== null;
-
-                // 1. Update Result Display
-                document.getElementById('resultProbability').innerText = formatProbability(probability);
-                
-                const statusEl = document.getElementById('resultStatus');
-                statusEl.innerText = predictionStatus === 1 ? 'HIGH RISK (DEFAULT)' : 'LOW RISK (NON-DEFAULT)';
-                statusEl.classList.remove('bg-red-100', 'bg-green-100', 'text-red-800', 'text-green-800', 'bg-gray-200', 'text-gray-700');
-                statusEl.classList.add(predictionStatus === 1 ? 'bg-red-100' : 'bg-green-100', predictionStatus === 1 ? 'text-red-800' : 'text-green-800');
-                
-                // 2. Update Doughnut Chart
-                probChart.data.datasets[0].data = [probability, nonDefaultProb];
-                probChart.data.datasets[0].backgroundColor = [predictionStatus === 1 ? '#ef4444' : '#f87171', predictionStatus === 1 ? '#34d399' : '#10b981'];
-                probChart.update();
-                
-                // 3. Update Contributions List
-                document.getElementById('contributionsList').innerHTML = createContributionsList(result.feature_contributions);
-                
-                // 4. Update Alert Message (NEW)
-                const alertMessageEl = document.getElementById('alertMessage');
-                if (isHighRisk) {
-                    alertMessageEl.classList.remove('hidden');
+                const json = await res.json();
+                predictLoading.classList.add('hidden');
+                predictResult.classList.remove('hidden');
+                predictProbability.innerText = `${(json.default_probability * 100).toFixed(2)}%`;
+                if (json.alert) {
+                    predictAlert.innerText = `${json.alert.risk_signal} (Severity: ${json.alert.severity})`;
                 } else {
-                    alertMessageEl.classList.add('hidden');
+                    predictAlert.innerText = 'No alert generated';
                 }
-                
-                // 5. Refresh History and Stats
-                fetchHistory();
-                fetchStats();
+                predictContribs.innerHTML = createContributionsList(json.feature_contributions || {});
 
-            } catch (error) {
-                console.error('Prediction Error:', error);
-                alert('Prediction failed: ' + error.message);
-                
-                // Reset to default on error
-                document.getElementById('resultProbability').innerText = '—';
-                document.getElementById('resultStatus').innerText = 'ERROR';
-                document.getElementById('resultStatus').classList.remove('bg-red-100', 'bg-green-100', 'text-red-800', 'text-green-800');
-                document.getElementById('resultStatus').classList.add('bg-red-100', 'text-red-800');
-                document.getElementById('contributionsList').innerHTML = '<div class="text-sm text-red-500">Error fetching contributions.</div>';
-                document.getElementById('alertMessage').classList.add('hidden');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = initialIcon + ' <span>' + initialText + '</span>';
+                // refresh customers list to reflect any changes (no change expected but safe)
+                fetchCustomers(customersPage);
+            } catch (err) {
+                closePredictModal();
+                showToast('Prediction error: ' + (err.message || err), 'error');
             }
-        });
+        }
 
-        document.getElementById('explainBtn').addEventListener('click', async () => {
-             alert('Global Feature Explainer: This would typically open a modal showing a global SHAP summary plot. (Not fully implemented on frontend)');
-        });
+        //Toast helper
+        function showToast(message, type = 'info', ttl = 4000) {
+            const c = document.getElementById('toastContainer');
+            const el = document.createElement('div');
+            el.className = `px-4 py-3 rounded shadow text-sm text-white ${type === 'error' ? 'bg-red-600' : type === 'success' ? 'bg-green-600' : 'bg-indigo-600'}`;
+            el.innerText = message;
+            c.appendChild(el);
+            setTimeout(() => { el.classList.add('opacity-0'); setTimeout(() => el.remove(), 300); }, ttl);
+        }
 
-        document.getElementById('exportReportBtn').addEventListener('click', async () => {
-            const loadingIndicator = document.getElementById('exportReportBtn');
-            const initialText = loadingIndicator.innerText;
-            loadingIndicator.innerText = 'Generating PDF...';
-            loadingIndicator.disabled = true;
+        const customerModal = document.getElementById('customerModal');
+        const customerForm = document.getElementById('customerForm');
+        const customerModalTitle = document.getElementById('customerModalTitle');
+        const customerIdField = document.getElementById('customer_id_field');
+        const customerFormCancel = document.getElementById('customerFormCancel');
+        const customerModalClose = document.getElementById('customerModalClose');
+        const wizardNext = document.getElementById('wizardNext');
+        const wizardBack = document.getElementById('wizardBack');
+        const wizardStepIndex = document.getElementById('wizardStepIndex');
+        const customerFormSubmit = document.getElementById('customerFormSubmit');
+        const customerModalOverlay = document.getElementById('customerModalOverlay');
+        //allow clicking the overlay to close the modal
+        if (customerModalOverlay) customerModalOverlay.addEventListener('click', closeCustomerModal);
 
-            const data = Object.fromEntries(new FormData(form).entries());
-            ['rate_of_interest', 'Interest_rate_spread', 'Upfront_charges', 'term', 'income', 'Credit_Score', 'LTV', 'dtir1'].forEach(key => {
-                data[key] = parseFloat(data[key]);
-            });
+        let currentWizardStep = 1;
+        const TOTAL_WIZARD_STEPS = 3;
 
-            try {
-                const r = await fetch(window.location.origin + '/export_report', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                    credentials: 'same-origin'
+        function setWizardStep(step) {
+            currentWizardStep = step;
+            wizardStepIndex.innerText = String(step);
+            document.querySelectorAll('.wizard-step').forEach(el => { el.classList.add('hidden'); });
+            const current = document.querySelector(`.wizard-step[data-step="${step}"]`);
+            if (current) current.classList.remove('hidden');
+
+            // Show/hide buttons
+            wizardBack.style.display = step === 1 ? 'none' : 'inline-block';
+            wizardNext.style.display = step === TOTAL_WIZARD_STEPS ? 'none' : 'inline-block';
+            customerFormSubmit.classList.toggle('hidden', step !== TOTAL_WIZARD_STEPS);
+
+            // If review step, build review block
+            if (step === TOTAL_WIZARD_STEPS) {
+                const fd = new FormData(customerForm);
+                const summary = [];
+                for (const [k, v] of fd.entries()) {
+                    if (k === 'customer_id') continue;
+                    summary.push(`<div><strong>${k}:</strong> ${v}</div>`);
+                }
+                document.getElementById('reviewBlock').innerHTML = summary.join('');
+            }
+        }
+
+        function clearFieldErrors() {
+            document.querySelectorAll('.field-error').forEach(e => e.innerText = '');
+        }
+
+        function validateStep(step) {
+            clearFieldErrors();
+            let ok = true;
+            if (step === 1) {
+                ['loan_limit', 'Gender', 'approv_in_adv', 'loan_type', 'loan_purpose', 'Credit_Worthiness', 'open_credit', 'business_or_purpose', 'Neg_ammortization', 'interest_only', 'lump_sum_payment', 'Occupancy_Type', 'Secured_by', 'total_units', 'credit_type', 'co_applicant_credit_type', 'age', 'submission_of_application', 'Region', 'Security_Type'].forEach(f => {
+                    const el = customerForm.elements.namedItem(f);
+                    if (!el || !el.value || el.value.toString().trim() === '') {
+                        ok = false; const errEl = document.querySelector(`.field-error[data-field="${f}"]`); if (errEl) errEl.innerText = 'This field is required';
+                    }
                 });
+            } else if (step === 2) {
+                ['rate_of_interest', 'Interest_rate_spread', 'Upfront_charges', 'term', 'income', 'Credit_Score', 'LTV', 'dtir1'].forEach(f => {
+                    const el = customerForm.elements.namedItem(f);
+                    if (!el || el.value === '' || isNaN(Number(el.value))) {
+                        ok = false; const errEl = document.querySelector(`.field-error[data-field="${f}"]`); if (errEl) errEl.innerText = 'Enter a valid number';
+                    }
+                });
+            }
+            return ok;
+        }
+        wizardNext.addEventListener('click', () => {
+            if (validateStep(currentWizardStep)) setWizardStep(currentWizardStep + 1);
+        });
+        wizardBack.addEventListener('click', () => { setWizardStep(currentWizardStep - 1); });
 
-                if (r.status === 401) { window.location.href = '/admin-login'; return; }
+        function closeCustomerModal() {
+            customerModal.classList.add('hidden');
+            customerForm.reset();
+            customerIdField.value = '';
+            customerModalTitle.innerText = 'Add Customer';
+            customerForm.dataset.mode = '';
+            setWizardStep(1);
+            clearFieldErrors();
+        }
 
-                if (!r.ok) {
-                    const err = await r.json().catch(()=>({detail:'Export failed'}));
-                    throw new Error(err.detail || 'Export failed');
+        customerFormCancel.addEventListener('click', closeCustomerModal);
+        customerModalClose.addEventListener('click', closeCustomerModal);
+
+        async function openCustomerModal(mode, id = null) {
+            customerForm.dataset.mode = mode;
+            if (mode === 'add') {
+                customerModalTitle.innerText = 'Add Customer';
+                customerForm.reset();
+                customerIdField.value = '';
+                customerModal.classList.remove('hidden');
+                setWizardStep(1);
+                return;
+            }
+
+            //update
+            customerModalTitle.innerText = 'Update Customer';
+            try {
+                const getRes = await fetch(window.location.origin + '/api/customers?per_page=1&page=1&search_id=' + id, { credentials: 'same-origin' });
+                if (!getRes.ok) throw new Error('Failed to fetch customer');
+                const payload = (await getRes.json()).customers[0];
+                if (!payload) throw new Error('Customer not found');
+
+                //Populate fields
+                for (const k in payload) {
+                    const el = customerForm.elements.namedItem(k);
+                    if (!el) continue;
+                    el.value = payload[k];
                 }
+                customerIdField.value = id;
+                customerModal.classList.remove('hidden');
+                setWizardStep(1);
+            } catch (err) {
+                throw err;
+            }
+        }
 
-                const blob = await r.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'prediction_report_' + new Date().toISOString().slice(0, 10) + '.pdf';
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                window.URL.revokeObjectURL(url);
-            } catch (e) {
-                alert('Export failed: ' + e.message);
-            } finally {
-                loadingIndicator.innerText = initialText;
-                loadingIndicator.disabled = false;
+        //Optimistic UI: helpers to manipulate table immediately
+        function insertOptimisticRow(tempId, data) {
+            const t = document.getElementById('customersTable');
+            const row = document.createElement('tr');
+            row.id = `cust_row_${tempId}`;
+            row.innerHTML = `
+                <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">${tempId}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${data.loan_purpose}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${data.Credit_Score}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${data.income}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${data.Region}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <span class="text-xs text-gray-400">Creating...</span>
+                </td>
+            `;
+            t.prepend(row);
+        }
+        function replaceOptimisticRow(tempId, real) {
+            const r = document.getElementById(`cust_row_${tempId}`);
+            if (!r) return fetchCustomers(1);
+            r.outerHTML = `
+                <tr>
+                    <td class="px-3 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">${real.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${real.loan_purpose}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${real.Credit_Score}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${real.income}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${real.Region}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <button class="px-3 py-1 bg-yellow-500 text-white rounded text-xs mr-2" data-action="update" data-id="${real.id}">Update</button>
+                        <button class="px-3 py-1 bg-indigo-600 text-white rounded text-xs mr-2" data-action="predict" data-id="${real.id}">Predict</button>
+                        <button class="px-3 py-1 bg-red-600 text-white rounded text-xs" data-action="delete" data-id="${real.id}">Delete</button>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function optimisticUpdateRow(id, data) {
+            const rows = Array.from(document.querySelectorAll('#customersTable tr'));
+            for (const r of rows) {
+                if (r.querySelector('td') && r.querySelector('td').innerText === String(id)) {
+                    r.children[1].innerText = data.loan_purpose;
+                    r.children[2].innerText = data.Credit_Score;
+                    r.children[3].innerText = data.income;
+                    r.children[4].innerText = data.Region;
+                    return r;
+                }
+            }
+        }
+
+        customerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            // Validate all steps
+            let valid = true;
+            for (let s = 1; s <= TOTAL_WIZARD_STEPS - 1; s++) { if (!validateStep(s)) { setWizardStep(s); valid = false; break; } }
+            if (!valid) return;
+
+            const fd = new FormData(customerForm);
+            const body = {};
+            for (const [k, v] of fd.entries()) { if (k === 'customer_id') continue; body[k] = v; }
+            ['rate_of_interest', 'Interest_rate_spread', 'Upfront_charges', 'term', 'income', 'Credit_Score', 'LTV', 'dtir1'].forEach(k => { if (body[k] !== undefined && body[k] !== null && body[k] !== '') body[k] = parseFloat(body[k]); });
+
+            // Ensure required categorical and numeric defaults are present (server expects many fields)
+            const defaults = {
+                // categorical defaults
+                loan_limit: 'nlt', approv_in_adv: 'nopre', loan_type: 'type1', open_credit: 'nopc', business_or_purpose: 'bp1', Neg_ammortization: 'not_neg', interest_only: 'not_int', lump_sum_payment: 'not_lpsm', Occupancy_Type: 'pr', Secured_by: 'home', total_units: '1U', credit_type: 'CIB', co_applicant_credit_type: 'NA', age: '25-34', submission_of_application: 'to_inst', Security_Type: 'direct',
+                // numeric defaults
+                Interest_rate_spread: 0.5, Upfront_charges: 1500.0, LTV: 80.0, dtir1: 40.0
+            };
+            for (const [k, v] of Object.entries(defaults)) { if (body[k] === undefined || body[k] === null || body[k] === '') body[k] = v; }
+
+            const mode = customerForm.dataset.mode || 'add';
+            try {
+                if (mode === 'add') {
+                    // Optimistic create
+                    const tempId = 'tmp_' + Math.random().toString(36).slice(2, 9);
+                    insertOptimisticRow(tempId, body);
+                    closeCustomerModal();
+                    showToast('Creating customer...', 'info');
+
+                    const res = await fetch(window.location.origin + '/api/customers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), credentials: 'same-origin' });
+
+                    // Handle auth redirects or unauthorized
+                    if (res.status === 401 || (res.redirected && res.url && res.url.includes('/admin-login'))) {
+                        const el = document.getElementById(`cust_row_${tempId}`); if (el) el.remove();
+                        showToast('Session expired. Redirecting to login...', 'error');
+                        window.location.href = '/admin-login';
+                        return;
+                    }
+
+                    if (res.status === 422) {
+                        const json = await res.json().catch(() => null);
+                        const el = document.getElementById(`cust_row_${tempId}`); if (el) el.remove();
+                        // Show server validation errors inline if possible
+                        if (json && Array.isArray(json.detail)) {
+                            json.detail.forEach(err => {
+                                const loc = err.loc && err.loc[1] ? err.loc[1] : null;
+                                if (loc) {
+                                    const fld = customerForm.elements.namedItem(loc);
+                                    if (fld) {
+                                        const errEl = document.querySelector(`.field-error[data-field="${loc}"]`);
+                                        if (errEl) errEl.innerText = err.msg;
+                                    }
+                                }
+                            });
+                        }
+                        showToast('Validation failed. See errors on the form.', 'error');
+                        return;
+                    }
+
+                    if (!res.ok) {
+                        // remove optimistic row
+                        const el = document.getElementById(`cust_row_${tempId}`); if (el) el.remove();
+                        const txt = await res.text().catch(() => res.statusText);
+                        showToast('Create failed: ' + txt, 'error');
+                        return;
+                    }
+                    const real = await res.json();
+                    replaceOptimisticRow(tempId, real);
+                    showToast('Customer created', 'success');
+                } else {
+                    const id = customerIdField.value;
+                    // Optimistic update
+                    const previousRow = optimisticUpdateRow(id, body);
+                    closeCustomerModal();
+                    showToast('Updating customer...', 'info');
+                    const res = await fetch(window.location.origin + '/api/customers/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), credentials: 'same-origin' });
+
+                    if (res.status === 401 || (res.redirected && res.url && res.url.includes('/admin-login'))) {
+                        showToast('Session expired. Redirecting to login...', 'error');
+                        window.location.href = '/admin-login';
+                        return;
+                    }
+
+                    if (res.status === 422) {
+                        const json = await res.json().catch(() => null);
+                        if (json && Array.isArray(json.detail)) {
+                            json.detail.forEach(err => {
+                                const loc = err.loc && err.loc[1] ? err.loc[1] : null;
+                                if (loc) {
+                                    const fld = customerForm.elements.namedItem(loc);
+                                    if (fld) {
+                                        const errEl = document.querySelector(`.field-error[data-field="${loc}"]`);
+                                        if (errEl) errEl.innerText = err.msg;
+                                    }
+                                }
+                            });
+                        }
+                        showToast('Validation failed. See errors on the form.', 'error');
+                        fetchCustomers(customersPage);
+                        return;
+                    }
+
+                    if (!res.ok) {
+                        showToast('Update failed', 'error');
+                        fetchCustomers(customersPage);
+                        return;
+                    }
+                    showToast('Customer updated', 'success');
+                }
+            } catch (err) {
+                showToast('Save failed: ' + (err.message || err), 'error');
             }
         });
 
-        document.getElementById('resetBtn').addEventListener('click', ()=>{ form.reset(); });
+        // Predict modal removed (predictions disabled)
 
-        // on load
-        fetchHistory();
+        // on load (prediction history disabled)
         fetchStats();
         fetchMacroIndicators(); // NEW CALL
+        fetchCustomers(1);
     </script>
 </body>
+
 </html>

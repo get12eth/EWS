@@ -2,9 +2,9 @@ import os
 import sys
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from main import User, Base, get_password_hash, verify_password, get_user_by_username, create_user, update_user_password, get_user_by_email
+from init_db import User, Base, get_password_hash, verify_password, get_user_by_username, create_user, update_user_password, get_user_by_email
 
-# Set up database connection
+#Set up database connection
 DB_DIR = "data"
 DB_PATH = os.path.join(DB_DIR, "predictions.db")
 SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
@@ -14,10 +14,10 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 def test_database_auth():
     print("Testing database authentication functionality...")
     
-    # Create tables
+    #Create tables
     Base.metadata.create_all(bind=engine)
     
-    # Clean up any existing test user
+    #Clean up any existing test user
     db = SessionLocal()
     test_user = db.query(User).filter(User.username == "testuser").first()
     if test_user:
@@ -25,7 +25,7 @@ def test_database_auth():
         db.commit()
     db.close()
     
-    # Test creating a user
+    #Test creating a user
     print("\n1. Testing user creation...")
     user = create_user("testuser", "test@example.com", "testpassword")
     if user:
@@ -36,7 +36,7 @@ def test_database_auth():
         print("✗ Failed to create user")
         return
     
-    # Test getting user by username
+    #Test getting user by username
     print("\n2. Testing user retrieval...")
     retrieved_user = get_user_by_username("testuser")
     if retrieved_user:
@@ -47,7 +47,7 @@ def test_database_auth():
         print("✗ Failed to retrieve user")
         return
     
-    # Test password verification
+    #Test password verification
     print("\n3. Testing password verification...")
     if retrieved_user and verify_password("testpassword", retrieved_user.hashed_password):
         print("✓ Password verification successful")
@@ -55,19 +55,19 @@ def test_database_auth():
         print("✗ Password verification failed")
         return
     
-    # Test incorrect password
+    #Test incorrect password
     if retrieved_user and not verify_password("wrongpassword", retrieved_user.hashed_password):
         print("✓ Incorrect password correctly rejected")
     else:
         print("✗ Incorrect password was accepted")
         return
     
-    # Test password update
+    #Test password update
     print("\n4. Testing password update...")
     if update_user_password("testuser", "newpassword"):
         print("✓ Password updated successfully")
         
-        # Verify new password
+        #Verify new password
         updated_user = get_user_by_username("testuser")
         if updated_user and verify_password("newpassword", updated_user.hashed_password):
             print("✓ New password verified successfully")
